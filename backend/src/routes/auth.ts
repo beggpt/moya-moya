@@ -46,7 +46,7 @@ router.post('/register', async (req, res) => {
     const token = generateToken(user.id);
     res.json({
       token,
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      user: { id: user.id, email: user.email, name: user.name, role: user.role, profile: null },
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

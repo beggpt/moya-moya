@@ -25,7 +25,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     }
 
     // Redirect to onboarding if not completed
-    if (user && user.role === 'PATIENT' && user.profile && !user.profile.onboardingCompleted && pathname !== '/onboarding') {
+    if (user && user.role === 'PATIENT' && (!user.profile || !user.profile.onboardingCompleted) && pathname !== '/onboarding') {
       router.push('/onboarding');
     }
   }, [user, isLoading, pathname, router]);

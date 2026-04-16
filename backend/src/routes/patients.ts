@@ -19,6 +19,8 @@ const profileSchema = z.object({
   hadSurgery: z.boolean().optional(),
   surgeryType: z.string().optional().nullable(),
   surgeryDate: z.string().optional().nullable(),
+  surgeryDateLeft: z.string().optional().nullable(),
+  surgeryDateRight: z.string().optional().nullable(),
   surgeryNotes: z.string().optional().nullable(),
   bloodType: z.string().optional().nullable(),
   allergies: z.string().optional().nullable(),
@@ -57,6 +59,8 @@ router.put('/profile', async (req: AuthRequest, res) => {
     if (data.dateOfBirth) updateData.dateOfBirth = new Date(data.dateOfBirth);
     if (data.diagnosisDate) updateData.diagnosisDate = new Date(data.diagnosisDate);
     if (data.surgeryDate) updateData.surgeryDate = new Date(data.surgeryDate);
+    if (data.surgeryDateLeft) updateData.surgeryDateLeft = new Date(data.surgeryDateLeft);
+    if (data.surgeryDateRight) updateData.surgeryDateRight = new Date(data.surgeryDateRight);
 
     const profile = await prisma.patientProfile.upsert({
       where: { userId: req.user!.id },
@@ -82,6 +86,8 @@ router.post('/onboarding', async (req: AuthRequest, res) => {
     if (profileData.dateOfBirth) updateData.dateOfBirth = new Date(profileData.dateOfBirth);
     if (profileData.diagnosisDate) updateData.diagnosisDate = new Date(profileData.diagnosisDate);
     if (profileData.surgeryDate) updateData.surgeryDate = new Date(profileData.surgeryDate);
+    if (profileData.surgeryDateLeft) updateData.surgeryDateLeft = new Date(profileData.surgeryDateLeft);
+    if (profileData.surgeryDateRight) updateData.surgeryDateRight = new Date(profileData.surgeryDateRight);
 
     const profile = await prisma.patientProfile.upsert({
       where: { userId: req.user!.id },

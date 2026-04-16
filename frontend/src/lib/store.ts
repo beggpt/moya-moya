@@ -31,9 +31,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   updateUser: (updates) => {
     const current = get().user;
     if (current) {
-      const updated = { ...current, ...updates };
+      const updated = {
+        ...current,
+        ...updates,
+        profile: updates.profile ? { ...current.profile, ...updates.profile } : current.profile,
+      };
       localStorage.setItem('user', JSON.stringify(updated));
-      set({ user: updated });
+      set({ user: updated as User });
     }
   },
 

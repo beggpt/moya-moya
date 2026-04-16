@@ -84,6 +84,8 @@ model PatientProfile {
   hadSurgery       Boolean      @default(false)
   surgeryType      String?
   surgeryDate      DateTime?
+  surgeryDateLeft  DateTime?
+  surgeryDateRight DateTime?
   surgeryNotes     String?
 
   bloodType        String?
