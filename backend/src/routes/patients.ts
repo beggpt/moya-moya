@@ -54,13 +54,16 @@ router.get('/profile', async (req: AuthRequest, res) => {
 router.put('/profile', async (req: AuthRequest, res) => {
   try {
     const data = profileSchema.parse(req.body);
-    const updateData: any = { ...data };
+    const updateData: any = {};
+    for (const [key, val] of Object.entries(data)) {
+      updateData[key] = val === '' ? null : val;
+    }
 
-    if (data.dateOfBirth) updateData.dateOfBirth = new Date(data.dateOfBirth);
-    if (data.diagnosisDate) updateData.diagnosisDate = new Date(data.diagnosisDate);
-    if (data.surgeryDate) updateData.surgeryDate = new Date(data.surgeryDate);
-    if (data.surgeryDateLeft) updateData.surgeryDateLeft = new Date(data.surgeryDateLeft);
-    if (data.surgeryDateRight) updateData.surgeryDateRight = new Date(data.surgeryDateRight);
+    const dateFields = ['dateOfBirth', 'diagnosisDate', 'surgeryDate', 'surgeryDateLeft', 'surgeryDateRight'];
+    for (const field of dateFields) {
+      if (updateData[field]) updateData[field] = new Date(updateData[field]);
+      else if (field in updateData) updateData[field] = null;
+    }
 
     const profile = await prisma.patientProfile.upsert({
       where: { userId: req.user!.id },
@@ -82,12 +85,18 @@ router.post('/onboarding', async (req: AuthRequest, res) => {
   try {
     const { profile: profileData, medications } = req.body;
 
-    const updateData: any = { ...profileData, onboardingCompleted: true };
-    if (profileData.dateOfBirth) updateData.dateOfBirth = new Date(profileData.dateOfBirth);
-    if (profileData.diagnosisDate) updateData.diagnosisDate = new Date(profileData.diagnosisDate);
-    if (profileData.surgeryDate) updateData.surgeryDate = new Date(profileData.surgeryDate);
-    if (profileData.surgeryDateLeft) updateData.surgeryDateLeft = new Date(profileData.surgeryDateLeft);
-    if (profileData.surgeryDateRight) updateData.surgeryDateRight = new Date(profileData.surgeryDateRight);
+    // Clean empty strings → null for all fields
+    const updateData: any = { onboardingCompleted: true };
+    for (const [key, val] of Object.entries(profileData)) {
+      updateData[key] = val === '' ? null : val;
+    }
+
+    // Convert date strings to Date objects
+    const dateFields = ['dateOfBirth', 'diagnosisDate', 'surgeryDate', 'surgeryDateLeft', 'surgeryDateRight'];
+    for (const field of dateFields) {
+      if (updateData[field]) updateData[field] = new Date(updateData[field]);
+      else updateData[field] = null;
+    }
 
     const profile = await prisma.patientProfile.upsert({
       where: { userId: req.user!.id },

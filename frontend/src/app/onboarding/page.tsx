@@ -14,6 +14,78 @@ const FREQUENCY_OPTIONS = [
   { value: '3x dnevno', label: 'Tri puta dnevno', times: 3 },
 ];
 
+/** DD/MM/YYYY date input that stores ISO (YYYY-MM-DD) internally */
+function DateInput({ value, onChange, className }: { value: string; onChange: (iso: string) => void; className?: string }) {
+  // Convert ISO → display
+  const toDisplay = (iso: string) => {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  };
+
+  // Convert display → ISO
+  const toISO = (display: string) => {
+    const clean = display.replace(/[^0-9/]/g, '');
+    const parts = clean.split('/');
+    if (parts.length === 3 && parts[0].length <= 2 && parts[1].length <= 2 && parts[2].length === 4) {
+      const d = parts[0].padStart(2, '0');
+      const m = parts[1].padStart(2, '0');
+      return `${parts[2]}-${m}-${d}`;
+    }
+    return '';
+  };
+
+  const [display, setDisplay] = useState(toDisplay(value));
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+
+    // Auto-insert slashes
+    const digits = val.replace(/[^0-9]/g, '');
+    if (digits.length <= 2) {
+      val = digits;
+    } else if (digits.length <= 4) {
+      val = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    } else {
+      val = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
+    }
+
+    setDisplay(val);
+
+    // Only send to parent when we have a complete date
+    if (digits.length === 8) {
+      const iso = toISO(val);
+      if (iso) onChange(iso);
+    } else if (val === '') {
+      onChange('');
+    }
+  };
+
+  const handleBlur = () => {
+    // Reformat on blur if valid
+    if (display && display.length >= 8) {
+      const iso = toISO(display);
+      if (iso) {
+        setDisplay(toDisplay(iso));
+        onChange(iso);
+      }
+    }
+  };
+
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      value={display}
+      onChange={handleChange}
+      onBlur={handleBlur}
+      placeholder="DD/MM/GGGG"
+      className={className || 'input'}
+      maxLength={10}
+    />
+  );
+}
+
 function InfoTooltip({ title, text, onClose }: { title: string; text: string; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
@@ -33,6 +105,7 @@ function InfoTooltip({ title, text, onClose }: { title: string; text: string; on
 export default function OnboardingPage() {
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   const [infoModal, setInfoModal] = useState<{ title: string; text: string } | null>(null);
   const router = useRouter();
   const { updateUser } = useAuthStore();
@@ -61,7 +134,6 @@ export default function OnboardingPage() {
     const updated = [...medications];
     updated[idx] = { ...updated[idx], [key]: value };
 
-    // When frequency changes, adjust timesOfDay array
     if (key === 'frequency') {
       const opt = FREQUENCY_OPTIONS.find((o) => o.value === value);
       if (opt) {
@@ -83,12 +155,19 @@ export default function OnboardingPage() {
 
   const handleComplete = async () => {
     setSaving(true);
+    setError('');
     try {
-      const profileData: any = { ...profile };
+      const profileData: any = {};
+
+      // Clean: only send non-empty values, convert types
+      for (const [key, val] of Object.entries(profile)) {
+        if (val === '' || val === undefined) continue;
+        profileData[key] = val;
+      }
+
       if (profileData.height) profileData.height = parseFloat(profileData.height);
       if (profileData.weight) profileData.weight = parseFloat(profileData.weight);
       if (profileData.suzukiStage) profileData.suzukiStage = parseInt(profileData.suzukiStage);
-      if (!profileData.affectedSide) delete profileData.affectedSide;
 
       const activeMeds = medications.filter((m) => m.name.trim());
 
@@ -99,8 +178,9 @@ export default function OnboardingPage() {
 
       updateUser({ profile: { onboardingCompleted: true } });
       router.push('/dashboard');
-    } catch (error) {
-      console.error(error);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.error || 'Greška pri spremanju. Pokušajte ponovo.');
     } finally {
       setSaving(false);
     }
@@ -133,12 +213,16 @@ export default function OnboardingPage() {
           <h2 className="text-xl font-bold text-neutral-900 mb-1">{steps[step]}</h2>
           <p className="text-sm text-neutral-500 mb-6">Korak {step + 1} od {steps.length}</p>
 
+          {error && (
+            <div className="bg-red-50 text-danger text-sm px-4 py-3 rounded-xl mb-4">{error}</div>
+          )}
+
           {/* Step 0: Personal info */}
           {step === 0 && (
             <div className="space-y-4">
               <div>
                 <label className="label">Datum rođenja</label>
-                <input type="date" value={profile.dateOfBirth} onChange={(e) => updateProfile('dateOfBirth', e.target.value)} className="input" />
+                <DateInput value={profile.dateOfBirth} onChange={(v) => updateProfile('dateOfBirth', v)} />
               </div>
               <div>
                 <label className="label">Spol</label>
@@ -167,7 +251,7 @@ export default function OnboardingPage() {
             <div className="space-y-4">
               <div>
                 <label className="label">Datum dijagnoze</label>
-                <input type="date" value={profile.diagnosisDate} onChange={(e) => updateProfile('diagnosisDate', e.target.value)} className="input" />
+                <DateInput value={profile.diagnosisDate} onChange={(v) => updateProfile('diagnosisDate', v)} />
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -270,18 +354,18 @@ export default function OnboardingPage() {
                   {profile.affectedSide === 'BILATERAL' ? (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="label">Datum operacije — lijeva strana</label>
-                        <input type="date" value={profile.surgeryDateLeft} onChange={(e) => updateProfile('surgeryDateLeft', e.target.value)} className="input" />
+                        <label className="label">Operacija — lijeva</label>
+                        <DateInput value={profile.surgeryDateLeft} onChange={(v) => updateProfile('surgeryDateLeft', v)} />
                       </div>
                       <div>
-                        <label className="label">Datum operacije — desna strana</label>
-                        <input type="date" value={profile.surgeryDateRight} onChange={(e) => updateProfile('surgeryDateRight', e.target.value)} className="input" />
+                        <label className="label">Operacija — desna</label>
+                        <DateInput value={profile.surgeryDateRight} onChange={(v) => updateProfile('surgeryDateRight', v)} />
                       </div>
                     </div>
                   ) : (
                     <div>
                       <label className="label">Datum operacije</label>
-                      <input type="date" value={profile.surgeryDate} onChange={(e) => updateProfile('surgeryDate', e.target.value)} className="input" />
+                      <DateInput value={profile.surgeryDate} onChange={(v) => updateProfile('surgeryDate', v)} />
                     </div>
                   )}
                 </>
