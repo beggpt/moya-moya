@@ -42,6 +42,14 @@ model User {
   sosEvents     SOSEvent[]
   notifications Notification[]
 
+  // Social
+  posts            Post[]
+  comments         Comment[]
+  likes            Like[]
+  forumTopics      ForumTopic[]
+  sentRequests     Friendship[] @relation("requester")
+  receivedRequests Friendship[] @relation("receiver")
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   lastLoginAt   DateTime?
@@ -411,4 +419,110 @@ model EducationalContent {
 model AppSetting {
   key   String @id
   value String
+}
+
+// ============================================
+// SOCIAL: POSTS & FEED
+// ============================================
+
+model Post {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  content   String
+  image     String?
+  likes     Like[]
+  comments  Comment[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  content   String
+  postId    String?
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  topicId   String?
+  topic     ForumTopic? @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  parentId  String?
+  parent    Comment?  @relation("replies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("replies")
+
+  createdAt DateTime @default(now())
+
+  @@index([postId, createdAt])
+  @@index([topicId, createdAt])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+// ============================================
+// SOCIAL: FORUM
+// ============================================
+
+enum ForumCategory {
+  GENERAL
+  SYMPTOMS
+  TREATMENT
+  SURGERY
+  LIFESTYLE
+  MENTAL_HEALTH
+  CAREGIVERS
+  RESEARCH
+}
+
+model ForumTopic {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title     String
+  content   String
+  category  ForumCategory @default(GENERAL)
+  pinned    Boolean       @default(false)
+  locked    Boolean       @default(false)
+  comments  Comment[]
+
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([category, createdAt])
+  @@index([createdAt])
+}
+
+// ============================================
+// SOCIAL: FRIENDSHIPS
+// ============================================
+
+model Friendship {
+  id          String   @id @default(cuid())
+  requesterId String
+  requester   User     @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User     @relation("receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  accepted    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@unique([requesterId, receiverId])
+  @@index([receiverId, accepted])
 }

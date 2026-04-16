@@ -6,21 +6,23 @@ import { useAuthStore } from '@/lib/store';
 import {
   LayoutDashboard, Activity, Pill, Heart, Brain, Calendar,
   FileText, Shield, Dumbbell, User, LogOut, Users, BarChart3,
-  BookOpen, ChevronLeft, ChevronRight, UtensilsCrossed
+  BookOpen, ChevronLeft, ChevronRight, UtensilsCrossed,
+  MessageCircle, UserPlus, Home
 } from 'lucide-react';
 import { useState } from 'react';
 import clsx from 'clsx';
 
 const patientLinks = [
-  { href: '/dashboard', label: 'Pregled', icon: LayoutDashboard },
-  { href: '/symptoms', label: 'Simptomi', icon: Activity },
+  { href: '/dashboard', label: 'Početna', icon: Home },
+  { href: '/forum', label: 'Forum', icon: MessageCircle },
+  { href: '/friends', label: 'Prijatelji', icon: UserPlus },
+  { href: '/recipes', label: 'Recepti', icon: UtensilsCrossed },
   { href: '/medications', label: 'Lijekovi', icon: Pill },
+  { href: '/symptoms', label: 'Simptomi', icon: Activity },
   { href: '/blood-pressure', label: 'Krvni tlak', icon: Heart },
   { href: '/cognitive', label: 'Kognitivni testovi', icon: Brain },
   { href: '/appointments', label: 'Termini', icon: Calendar },
   { href: '/exercise', label: 'Vježba', icon: Dumbbell },
-  { href: '/recipes', label: 'Recepti', icon: UtensilsCrossed },
-  { href: '/reports', label: 'Izvještaji', icon: FileText },
   { href: '/emergency', label: 'Hitna kartica', icon: Shield },
   { href: '/profile', label: 'Profil', icon: User },
 ];

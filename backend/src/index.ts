@@ -16,6 +16,9 @@ import emergencyRoutes from './routes/emergency';
 import caregiverRoutes from './routes/caregiver';
 import reportRoutes from './routes/reports';
 import adminRoutes from './routes/admin';
+import postRoutes from './routes/posts';
+import forumRoutes from './routes/forum';
+import friendRoutes from './routes/friends';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -40,6 +43,9 @@ app.use('/api/emergency', emergencyRoutes);
 app.use('/api/caregiver', caregiverRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/forum', forumRoutes);
+app.use('/api/friends', friendRoutes);
 
 // Educational content (public)
 app.get('/api/content', async (_req, res) => {
