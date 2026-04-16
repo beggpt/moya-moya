@@ -1,0 +1,412 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// AUTH & USERS
+// ============================================
+
+enum Role {
+  ADMIN
+  PATIENT
+  CAREGIVER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String?
+  googleId      String?   @unique
+  name          String?
+  image         String?
+  role          Role      @default(PATIENT)
+  emailVerified Boolean   @default(false)
+  locale        String    @default("hr")
+
+  profile       PatientProfile?
+  symptoms      SymptomLog[]
+  medications   Medication[]
+  bpReadings    BPReading[]
+  cognitiveTests CognitiveTest[]
+  appointments  Appointment[]
+  exerciseLogs  ExerciseLog[]
+
+  caregiverFor  CaregiverLink[] @relation("caregiver")
+  caregivers    CaregiverLink[] @relation("patient")
+
+  sosEvents     SOSEvent[]
+  notifications Notification[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  @@index([email])
+  @@index([role])
+}
+
+// ============================================
+// PATIENT PROFILE
+// ============================================
+
+enum MoyamoyaType {
+  DISEASE
+  SYNDROME
+}
+
+enum Side {
+  LEFT
+  RIGHT
+  BILATERAL
+}
+
+model PatientProfile {
+  id               String       @id @default(cuid())
+  userId           String       @unique
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  dateOfBirth      DateTime?
+  gender           String?
+  height           Float?
+  weight           Float?
+
+  diagnosisDate    DateTime?
+  moyamoyaType     MoyamoyaType?
+  suzukiStage      Int?
+  affectedSide     Side?
+  underlyingCondition String?
+
+  hadSurgery       Boolean      @default(false)
+  surgeryType      String?
+  surgeryDate      DateTime?
+  surgeryNotes     String?
+
+  bloodType        String?
+  allergies        String?
+  otherConditions  String?
+
+  emergencyContact  String?
+  emergencyPhone    String?
+  emergencyRelation String?
+
+  hospitalName     String?
+  neurologistName  String?
+  neurologistPhone String?
+
+  bpTargetSystolicMin  Int?
+  bpTargetSystolicMax  Int?
+  bpTargetDiastolicMin Int?
+  bpTargetDiastolicMax Int?
+
+  onboardingCompleted Boolean @default(false)
+
+  adminNotes       String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// ============================================
+// SYMPTOM TRACKING
+// ============================================
+
+enum SymptomType {
+  TIA
+  HEADACHE
+  WEAKNESS
+  NUMBNESS
+  SPEECH_DIFFICULTY
+  VISION_CHANGE
+  SEIZURE
+  DIZZINESS
+  CONFUSION
+  BALANCE_LOSS
+  OTHER
+}
+
+model SymptomLog {
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  timestamp    DateTime    @default(now())
+  type         SymptomType
+  severity     Int
+  durationMin  Int?
+  bodyArea     String?
+  trigger      String?
+  activity     String?
+  notes        String?
+  voiceNoteUrl String?
+  wasEmergency Boolean     @default(false)
+
+  createdAt    DateTime    @default(now())
+
+  @@index([userId, timestamp])
+  @@index([userId, type])
+}
+
+// ============================================
+// MEDICATIONS
+// ============================================
+
+model Medication {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  dosage      String
+  unit        String        @default("mg")
+  frequency   String
+  timesOfDay  String[]
+  instructions String?
+  startDate   DateTime
+  endDate     DateTime?
+  active      Boolean       @default(true)
+
+  reminders   MedReminder[]
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([userId, active])
+}
+
+model MedReminder {
+  id           String     @id @default(cuid())
+  medicationId String
+  medication   Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+
+  scheduledAt  DateTime
+  takenAt      DateTime?
+  skipped      Boolean    @default(false)
+  skipReason   String?
+
+  @@index([medicationId, scheduledAt])
+}
+
+// ============================================
+// BLOOD PRESSURE
+// ============================================
+
+enum BPPosition {
+  LYING
+  SITTING
+  STANDING
+}
+
+model BPReading {
+  id         String     @id @default(cuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  systolic   Int
+  diastolic  Int
+  heartRate  Int?
+  position   BPPosition?
+  arm        String?
+  timestamp  DateTime   @default(now())
+  notes      String?
+
+  @@index([userId, timestamp])
+}
+
+// ============================================
+// COGNITIVE TESTS
+// ============================================
+
+enum CognitiveTestType {
+  REACTION_TIME
+  MEMORY_RECALL
+  PATTERN_MATCH
+  WORD_FLUENCY
+  DIGIT_SPAN
+  STROOP
+}
+
+model CognitiveTest {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  testType  CognitiveTestType
+  score     Float
+  maxScore  Float?
+  duration  Int
+  details   String?
+  timestamp DateTime          @default(now())
+
+  @@index([userId, testType, timestamp])
+}
+
+// ============================================
+// APPOINTMENTS
+// ============================================
+
+model Appointment {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  doctorName  String
+  specialty   String
+  date        DateTime
+  location    String?
+  phone       String?
+  notes       String?
+  questions   String?
+  summary     String?
+  completed   Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, date])
+}
+
+// ============================================
+// EXERCISE TRACKING
+// ============================================
+
+enum ExerciseIntensity {
+  LOW
+  MODERATE
+  HIGH
+}
+
+enum ExerciseSafety {
+  SAFE
+  CAUTION
+  AVOID
+}
+
+model ExerciseLog {
+  id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  activity    String
+  intensity   ExerciseIntensity
+  safety      ExerciseSafety
+  durationMin Int
+  heartRateAvg Int?
+  heartRateMax Int?
+  hydrated    Boolean           @default(true)
+  symptoms    String?
+  notes       String?
+  timestamp   DateTime          @default(now())
+
+  @@index([userId, timestamp])
+}
+
+// ============================================
+// CAREGIVER
+// ============================================
+
+enum CaregiverPermission {
+  READ_ONLY
+  READ_ALERTS
+  FULL_ACCESS
+}
+
+model CaregiverLink {
+  id           String              @id @default(cuid())
+  caregiverId  String
+  caregiver    User                @relation("caregiver", fields: [caregiverId], references: [id], onDelete: Cascade)
+  patientId    String
+  patient      User                @relation("patient", fields: [patientId], references: [id], onDelete: Cascade)
+
+  permission   CaregiverPermission @default(READ_ONLY)
+  inviteToken  String?             @unique
+  accepted     Boolean             @default(false)
+
+  createdAt    DateTime            @default(now())
+
+  @@unique([caregiverId, patientId])
+}
+
+// ============================================
+// EMERGENCY / SOS
+// ============================================
+
+model SOSEvent {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  latitude    Float?
+  longitude   Float?
+  address     String?
+  contactsNotified String[]
+  resolvedAt  DateTime?
+  notes       String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+enum NotificationType {
+  MED_REMINDER
+  APPOINTMENT_REMINDER
+  SOS_ALERT
+  CAREGIVER_ALERT
+  WEEKLY_SUMMARY
+  EDUCATIONAL
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type      NotificationType
+  title     String
+  body      String
+  data      String?
+  read      Boolean          @default(false)
+  readAt    DateTime?
+
+  createdAt DateTime         @default(now())
+
+  @@index([userId, read, createdAt])
+}
+
+// ============================================
+// EDUCATIONAL CONTENT (admin-managed)
+// ============================================
+
+model EducationalContent {
+  id          String   @id @default(cuid())
+  title       String
+  body        String
+  category    String
+  locale      String   @default("hr")
+  order       Int      @default(0)
+  published   Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category, locale, published])
+}
+
+// ============================================
+// APP SETTINGS
+// ============================================
+
+model AppSetting {
+  key   String @id
+  value String
+}
