@@ -67,7 +67,10 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = loginSchema.parse(req.body);
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { profile: { select: { onboardingCompleted: true } } },
+    });
     if (!user || !user.passwordHash) {
       return res.status(401).json({ error: 'Pogrešan email ili lozinka' });
     }
@@ -82,7 +85,10 @@ router.post('/login', async (req, res) => {
     const token = generateToken(user.id);
     res.json({
       token,
-      user: { id: user.id, email: user.email, name: user.name, role: user.role, image: user.image },
+      user: {
+        id: user.id, email: user.email, name: user.name, role: user.role, image: user.image,
+        profile: user.profile ? { onboardingCompleted: user.profile.onboardingCompleted } : null,
+      },
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -134,10 +140,19 @@ router.post('/google', async (req, res) => {
       });
     }
 
+    // Re-fetch with profile for onboarding check
+    const fullUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: { profile: { select: { onboardingCompleted: true } } },
+    });
+
     const token = generateToken(user.id);
     res.json({
       token,
-      user: { id: user.id, email: user.email, name: user.name, role: user.role, image: user.image },
+      user: {
+        id: user.id, email: user.email, name: user.name, role: user.role, image: user.image,
+        profile: fullUser?.profile ? { onboardingCompleted: fullUser.profile.onboardingCompleted } : null,
+      },
     });
   } catch (error) {
     console.error('Google auth error:', error);
