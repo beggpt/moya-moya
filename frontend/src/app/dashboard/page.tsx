@@ -355,17 +355,18 @@ export default function DashboardPage() {
         {/* Main column */}
         <div className="flex-1 min-w-0">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-neutral-900">
+          <div className="flex items-center justify-between gap-3 mb-6">
+            <div className="min-w-0">
+              <h1 className="text-xl md:text-2xl font-bold text-neutral-900 truncate">
                 {user?.name ? `Hi, ${user.name.split(' ')[0]}!` : 'Home'}
               </h1>
-              <p className="text-neutral-500 text-sm">
+              <p className="text-neutral-500 text-xs md:text-sm truncate">
                 {format(new Date(), 'EEEE, MMMM d, yyyy', { locale: enUS })}
               </p>
             </div>
-            <button onClick={() => setShowTopicModal(true)} className="btn-primary">
-              <Plus className="w-5 h-5 mr-2" /> New topic
+            <button onClick={() => setShowTopicModal(true)} className="btn-primary shrink-0 px-3 md:px-6">
+              <Plus className="w-5 h-5 md:mr-2" />
+              <span className="hidden md:inline">New topic</span>
             </button>
           </div>
 

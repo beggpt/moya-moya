@@ -58,7 +58,7 @@
 
 @layer components {
   .card {
-    @apply bg-white rounded-2xl shadow-sm border border-neutral-200 p-6;
+    @apply bg-white rounded-2xl shadow-sm border border-neutral-200 p-4 md:p-6;
   }
 
   .card-hover {
@@ -120,9 +120,11 @@
   }
 
   .sos-button {
-    @apply fixed top-4 right-4 w-14 h-14 bg-danger text-white rounded-full
+    @apply fixed right-4 w-14 h-14 bg-danger text-white rounded-full
            shadow-lg shadow-red-300/40 flex items-center justify-center
-           font-bold text-xs z-50 hover:bg-red-700 active:scale-95 transition-all;
+           font-bold text-xs z-50 hover:bg-red-700 active:scale-95 transition-all
+           top-auto md:top-4 bottom-24 md:bottom-auto;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .stat-card {
@@ -144,6 +146,15 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .animate-slide-in {
+    animation: slide-in 0.2s ease-out;
+  }
+}
+
+@keyframes slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 
 @media print {

@@ -1,0 +1,56 @@
+{
+  "name": "MoyaMoya Companion",
+  "short_name": "MoyaMoya",
+  "description": "Community and health tracking app for moyamoya disease patients",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FAFAF9",
+  "theme_color": "#0D9488",
+  "scope": "/",
+  "categories": ["health", "medical", "lifestyle"],
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Emergency Card",
+      "short_name": "Emergency",
+      "description": "Show your medical emergency card",
+      "url": "/emergency",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Log Blood Pressure",
+      "short_name": "BP",
+      "description": "Quickly log your blood pressure",
+      "url": "/blood-pressure",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Symptoms",
+      "short_name": "Symptoms",
+      "description": "Log a new symptom",
+      "url": "/symptoms",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

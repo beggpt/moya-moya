@@ -77,7 +77,8 @@ export default function Sidebar() {
 
   return (
     <aside className={clsx(
-      'fixed left-0 top-0 h-full bg-white border-r border-neutral-200 z-40 transition-all duration-200 flex flex-col',
+      'fixed left-0 top-0 h-full bg-white border-r border-neutral-200 z-40 transition-all duration-200 flex-col',
+      'hidden md:flex', // Desktop-only: hidden on mobile, shown md+
       collapsed ? 'w-[72px]' : 'w-64'
     )}>
       {/* Logo */}
