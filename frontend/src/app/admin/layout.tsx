@@ -2,5 +2,5 @@
 import AppShell from '@/components/shared/AppShell';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <AppShell hideSOS>{children}</AppShell>;
+  return <AppShell hideFAB>{children}</AppShell>;
 }

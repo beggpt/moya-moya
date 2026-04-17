@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { formatDistanceToNow, format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
@@ -268,9 +268,21 @@ function RightSidebar() {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuthStore();
-  const [tab, setTab] = useState<'forum' | 'objave'>('forum');
+  const composeParam = searchParams?.get('compose') === '1';
+  const [tab, setTab] = useState<'forum' | 'objave'>(composeParam ? 'objave' : 'forum');
   const [category, setCategory] = useState<ForumCategory | ''>('');
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+
+  // If landed with ?compose=1, switch to Posts tab and focus the composer
+  useEffect(() => {
+    if (composeParam) {
+      setTab('objave');
+      // Wait for tab render then focus
+      setTimeout(() => composerRef.current?.focus(), 100);
+    }
+  }, [composeParam]);
 
   // Forum state
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -481,7 +493,9 @@ export default function DashboardPage() {
                 <div className="flex items-start gap-3">
                   {user && <Avatar user={{ name: user.name || '', image: (user as any).image }} />}
                   <div className="flex-1">
-                    <textarea className="input w-full resize-none text-sm" rows={3} placeholder="What's new?"
+                    <textarea
+                      ref={composerRef}
+                      className="input w-full resize-none text-sm" rows={3} placeholder="What's new?"
                       value={newPostContent} onChange={(e) => setNewPostContent(e.target.value)}
                     />
                     <div className="flex justify-end mt-2">
