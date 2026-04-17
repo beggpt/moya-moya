@@ -18,35 +18,35 @@ export default function AdminReportsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-neutral-500">Ucitavanje...</div>
+        <div className="text-neutral-500">Loading...</div>
       </div>
     );
   }
 
   const cards = [
     {
-      label: 'Ukupno korisnika',
+      label: 'Total users',
       value: stats?.totalUsers || 0,
       icon: Users,
       color: 'text-primary-500',
       bg: 'bg-primary-50',
     },
     {
-      label: 'Aktivni ovaj tjedan',
+      label: 'Active this week',
       value: stats?.activeUsers7d || 0,
       icon: Activity,
       color: 'text-success',
       bg: 'bg-green-50',
     },
     {
-      label: 'Ukupno objava',
+      label: 'Total posts',
       value: stats?.totalSOS || 0,
       icon: MessageSquare,
       color: 'text-info',
       bg: 'bg-blue-50',
     },
     {
-      label: 'Ukupno tema na forumu',
+      label: 'Total forum topics',
       value: stats?.totalSymptoms || 0,
       icon: TrendingUp,
       color: 'text-warning',
@@ -57,8 +57,8 @@ export default function AdminReportsPage() {
   return (
     <div className="max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-neutral-900">Analitika</h1>
-        <p className="text-neutral-500">Pregled aktivnosti platforme</p>
+        <h1 className="text-2xl font-bold text-neutral-900">Analytics</h1>
+        <p className="text-neutral-500">Platform activity overview</p>
       </div>
 
       {/* Stat Cards */}
@@ -78,22 +78,22 @@ export default function AdminReportsPage() {
 
       {/* Activity Summary */}
       <div className="card">
-        <h2 className="text-lg font-semibold text-neutral-800 mb-4">Pregled aktivnosti</h2>
+        <h2 className="text-lg font-semibold text-neutral-800 mb-4">Activity overview</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 rounded-xl bg-neutral-50">
-            <p className="text-sm text-neutral-500 mb-1">Novi korisnici ovaj tjedan</p>
+            <p className="text-sm text-neutral-500 mb-1">New users this week</p>
             <p className="text-xl font-bold text-neutral-800">+{stats?.newThisWeek || 0}</p>
           </div>
           <div className="p-4 rounded-xl bg-neutral-50">
-            <p className="text-sm text-neutral-500 mb-1">Simptomi (30 dana)</p>
+            <p className="text-sm text-neutral-500 mb-1">Symptoms (30 days)</p>
             <p className="text-xl font-bold text-neutral-800">{stats?.symptoms30d || 0}</p>
           </div>
           <div className="p-4 rounded-xl bg-neutral-50">
-            <p className="text-sm text-neutral-500 mb-1">Aktivni lijekovi</p>
+            <p className="text-sm text-neutral-500 mb-1">Active medications</p>
             <p className="text-xl font-bold text-neutral-800">{stats?.activeMedications || 0}</p>
           </div>
           <div className="p-4 rounded-xl bg-neutral-50">
-            <p className="text-sm text-neutral-500 mb-1">BP mjerenja (30 dana)</p>
+            <p className="text-sm text-neutral-500 mb-1">BP readings (30 days)</p>
             <p className="text-xl font-bold text-neutral-800">{stats?.bpReadings30d || 0}</p>
           </div>
         </div>

@@ -17,20 +17,20 @@ interface Medication {
 }
 
 const FREQUENCIES = [
-  { value: 'once_daily', label: 'Jednom dnevno' },
-  { value: 'twice_daily', label: 'Dva puta dnevno' },
-  { value: 'three_daily', label: 'Tri puta dnevno' },
-  { value: 'as_needed', label: 'Po potrebi' },
+  { value: 'once_daily', label: 'Once daily' },
+  { value: 'twice_daily', label: 'Twice daily' },
+  { value: 'three_daily', label: 'Three times daily' },
+  { value: 'as_needed', label: 'As needed' },
 ];
 
 const TIMES_OF_DAY = [
-  { value: 'morning', label: 'Jutro' },
-  { value: 'afternoon', label: 'Popodne' },
-  { value: 'evening', label: 'Vecer' },
-  { value: 'night', label: 'Noc' },
+  { value: 'morning', label: 'Morning' },
+  { value: 'afternoon', label: 'Afternoon' },
+  { value: 'evening', label: 'Evening' },
+  { value: 'night', label: 'Night' },
 ];
 
-const UNITS = ['mg', 'ml', 'g', 'mcg', 'IU', 'tableta'];
+const UNITS = ['mg', 'ml', 'g', 'mcg', 'IU', 'tablet'];
 
 const timeLabel = (t: string) =>
   TIMES_OF_DAY.find((td) => td.value === t)?.label || t;
@@ -130,7 +130,7 @@ export default function MedicationsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-neutral-500">Ucitavanje...</div>
+        <div className="text-neutral-500">Loading...</div>
       </div>
     );
   }
@@ -139,11 +139,11 @@ export default function MedicationsPage() {
     <div className="max-w-4xl">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Lijekovi</h1>
-          <p className="text-neutral-500">{medications.length} aktivnih lijekova</p>
+          <h1 className="text-2xl font-bold text-neutral-900">Medications</h1>
+          <p className="text-neutral-500">{medications.length} active medications</p>
         </div>
         <button onClick={() => setShowModal(true)} className="btn-primary">
-          <Plus className="w-5 h-5 mr-2" /> Dodaj lijek
+          <Plus className="w-5 h-5 mr-2" /> Add medication
         </button>
       </div>
 
@@ -151,9 +151,9 @@ export default function MedicationsPage() {
       {medications.length === 0 ? (
         <div className="card text-center py-12">
           <Pill className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-          <p className="text-neutral-500 mb-4">Nemate dodanih lijekova</p>
+          <p className="text-neutral-500 mb-4">You haven't added any medications</p>
           <button onClick={() => setShowModal(true)} className="btn-primary">
-            <Plus className="w-5 h-5 mr-2" /> Dodaj prvi lijek
+            <Plus className="w-5 h-5 mr-2" /> Add first medication
           </button>
         </div>
       ) : (
@@ -188,11 +188,11 @@ export default function MedicationsPage() {
                 <div className="flex items-center gap-2">
                   {med.takenToday ? (
                     <span className="badge bg-green-100 text-green-700 text-sm flex items-center gap-1">
-                      <Check className="w-4 h-4" /> Uzeto
+                      <Check className="w-4 h-4" /> Taken
                     </span>
                   ) : med.skippedToday ? (
                     <span className="badge bg-neutral-100 text-neutral-500 text-sm flex items-center gap-1">
-                      <SkipForward className="w-4 h-4" /> Preskoceno
+                      <SkipForward className="w-4 h-4" /> Skipped
                     </span>
                   ) : (
                     <>
@@ -202,7 +202,7 @@ export default function MedicationsPage() {
                         className="px-4 py-2 bg-primary-500 text-white text-sm font-semibold rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-1 min-h-[36px]"
                       >
                         <Check className="w-4 h-4" />
-                        {actionLoading === med.id + '-taken' ? '...' : 'Uzeto'}
+                        {actionLoading === med.id + '-taken' ? '...' : 'Taken'}
                       </button>
                       <button
                         onClick={() => handleSkip(med.id)}
@@ -210,7 +210,7 @@ export default function MedicationsPage() {
                         className="btn-ghost text-sm flex items-center gap-1"
                       >
                         <SkipForward className="w-4 h-4" />
-                        {actionLoading === med.id + '-skip' ? '...' : 'Preskoci'}
+                        {actionLoading === med.id + '-skip' ? '...' : 'Skip'}
                       </button>
                     </>
                   )}
@@ -226,7 +226,7 @@ export default function MedicationsPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-neutral-900">Dodaj lijek</h2>
+              <h2 className="text-xl font-bold text-neutral-900">Add medication</h2>
               <button
                 onClick={() => { setShowModal(false); resetForm(); }}
                 className="p-2 hover:bg-neutral-100 rounded-lg"
@@ -237,33 +237,33 @@ export default function MedicationsPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label htmlFor="med-name" className="label">Naziv lijeka</label>
+                <label htmlFor="med-name" className="label">Medication name</label>
                 <input
                   id="med-name"
                   type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   className="input"
-                  placeholder="npr. Aspirin"
+                  placeholder="e.g. Aspirin"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="med-dosage" className="label">Doza</label>
+                  <label htmlFor="med-dosage" className="label">Dose</label>
                   <input
                     id="med-dosage"
                     type="number"
                     value={formDosage}
                     onChange={(e) => setFormDosage(e.target.value)}
                     className="input"
-                    placeholder="npr. 100"
+                    placeholder="e.g. 100"
                     required
                   />
                 </div>
                 <div>
-                  <label htmlFor="med-unit" className="label">Jedinica</label>
+                  <label htmlFor="med-unit" className="label">Unit</label>
                   <select
                     id="med-unit"
                     value={formUnit}
@@ -278,7 +278,7 @@ export default function MedicationsPage() {
               </div>
 
               <div>
-                <label htmlFor="med-freq" className="label">Ucestalost</label>
+                <label htmlFor="med-freq" className="label">Frequency</label>
                 <select
                   id="med-freq"
                   value={formFrequency}
@@ -292,7 +292,7 @@ export default function MedicationsPage() {
               </div>
 
               <div>
-                <label className="label">Vrijeme uzimanja</label>
+                <label className="label">Time of day</label>
                 <div className="grid grid-cols-2 gap-2">
                   {TIMES_OF_DAY.map((t) => (
                     <button
@@ -312,7 +312,7 @@ export default function MedicationsPage() {
               </div>
 
               <button type="submit" disabled={saving} className="btn-primary w-full">
-                {saving ? 'Spremanje...' : 'Spremi lijek'}
+                {saving ? 'Saving...' : 'Save medication'}
               </button>
             </form>
           </div>

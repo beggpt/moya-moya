@@ -13,11 +13,11 @@ interface Article {
 }
 
 const CATEGORIES = [
-  { value: 'general', label: 'Opcenito' },
-  { value: 'symptoms', label: 'Simptomi' },
-  { value: 'treatment', label: 'Lijecenje' },
-  { value: 'lifestyle', label: 'Stil zivota' },
-  { value: 'research', label: 'Istrazivanja' },
+  { value: 'general', label: 'General' },
+  { value: 'symptoms', label: 'Symptoms' },
+  { value: 'treatment', label: 'Treatment' },
+  { value: 'lifestyle', label: 'Lifestyle' },
+  { value: 'research', label: 'Research' },
 ];
 
 export default function AdminContentPage() {
@@ -55,7 +55,7 @@ export default function AdminContentPage() {
         title: formTitle,
         body: formBody,
         category: formCategory,
-        locale: 'hr',
+        locale: 'en',
       });
       setShowModal(false);
       resetForm();
@@ -79,7 +79,7 @@ export default function AdminContentPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-neutral-500">Ucitavanje...</div>
+        <div className="text-neutral-500">Loading...</div>
       </div>
     );
   }
@@ -88,11 +88,11 @@ export default function AdminContentPage() {
     <div className="max-w-6xl">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Upravljanje sadrzajem</h1>
-          <p className="text-neutral-500">{articles.length} clanaka</p>
+          <h1 className="text-2xl font-bold text-neutral-900">Content management</h1>
+          <p className="text-neutral-500">{articles.length} articles</p>
         </div>
         <button onClick={() => setShowModal(true)} className="btn-primary">
-          <Plus className="w-5 h-5 mr-2" /> Dodaj clanak
+          <Plus className="w-5 h-5 mr-2" /> Add article
         </button>
       </div>
 
@@ -100,9 +100,9 @@ export default function AdminContentPage() {
       {articles.length === 0 ? (
         <div className="card text-center py-12">
           <FileText className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-          <p className="text-neutral-500 mb-4">Nema objavljenih clanaka</p>
+          <p className="text-neutral-500 mb-4">No published articles</p>
           <button onClick={() => setShowModal(true)} className="btn-primary">
-            <Plus className="w-5 h-5 mr-2" /> Dodaj prvi clanak
+            <Plus className="w-5 h-5 mr-2" /> Add first article
           </button>
         </div>
       ) : (
@@ -118,11 +118,11 @@ export default function AdminContentPage() {
                     </span>
                     {article.published ? (
                       <span className="badge bg-green-100 text-green-700 text-xs flex items-center gap-1">
-                        <Eye className="w-3 h-3" /> Objavljeno
+                        <Eye className="w-3 h-3" /> Published
                       </span>
                     ) : (
                       <span className="badge bg-neutral-100 text-neutral-500 text-xs flex items-center gap-1">
-                        <EyeOff className="w-3 h-3" /> Skica
+                        <EyeOff className="w-3 h-3" /> Draft
                       </span>
                     )}
                   </div>
@@ -137,7 +137,7 @@ export default function AdminContentPage() {
                   }}
                   className={`btn-ghost text-xs shrink-0 ${article.published ? 'text-danger' : 'text-primary-600'}`}
                 >
-                  {article.published ? 'Sakrij' : 'Objavi'}
+                  {article.published ? 'Hide' : 'Publish'}
                 </button>
               </div>
             </div>
@@ -150,7 +150,7 @@ export default function AdminContentPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-neutral-900">Novi clanak</h2>
+              <h2 className="text-xl font-bold text-neutral-900">New article</h2>
               <button
                 onClick={() => { setShowModal(false); resetForm(); }}
                 className="p-2 hover:bg-neutral-100 rounded-lg"
@@ -161,20 +161,20 @@ export default function AdminContentPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label htmlFor="title" className="label">Naslov</label>
+                <label htmlFor="title" className="label">Title</label>
                 <input
                   id="title"
                   type="text"
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
                   className="input"
-                  placeholder="Unesite naslov clanka..."
+                  placeholder="Enter article title..."
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="category" className="label">Kategorija</label>
+                <label htmlFor="category" className="label">Category</label>
                 <select
                   id="category"
                   value={formCategory}
@@ -188,20 +188,20 @@ export default function AdminContentPage() {
               </div>
 
               <div>
-                <label htmlFor="body" className="label">Sadrzaj</label>
+                <label htmlFor="body" className="label">Content</label>
                 <textarea
                   id="body"
                   value={formBody}
                   onChange={(e) => setFormBody(e.target.value)}
                   className="input min-h-[160px]"
                   rows={6}
-                  placeholder="Unesite sadrzaj clanka..."
+                  placeholder="Enter article content..."
                   required
                 />
               </div>
 
               <button type="submit" disabled={saving} className="btn-primary w-full">
-                {saving ? 'Spremanje...' : 'Spremi clanak'}
+                {saving ? 'Saving...' : 'Save article'}
               </button>
             </form>
           </div>

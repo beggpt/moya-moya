@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 
-const publicPaths = ['/', '/login', '/register', '/emergency'];
+const publicPaths = ['/', '/login', '/register'];
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoading, loadFromStorage } = useAuthStore();
@@ -18,7 +18,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (isLoading) return;
 
-    const isPublic = publicPaths.some((p) => pathname === p || pathname.startsWith('/emergency/'));
+    // /emergency/:token is a public card page; /emergency (no token) is authenticated
+    const isPublic = publicPaths.some((p) => pathname === p) || /^\/emergency\/[^/]+$/.test(pathname);
 
     if (!user && !isPublic) {
       router.push('/login');
@@ -37,7 +38,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
           <div className="w-12 h-12 bg-primary-500 rounded-2xl flex items-center justify-center animate-pulse">
             <span className="text-white font-bold text-lg">M</span>
           </div>
-          <p className="text-neutral-500 text-sm">Učitavanje...</p>
+          <p className="text-neutral-500 text-sm">Loading...</p>
         </div>
       </div>
     );

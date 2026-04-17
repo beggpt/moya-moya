@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../utils/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { createNotification, notifyTopicSubscribers } from '../services/notifications';
 
 const router = Router();
 router.use(authMiddleware);
@@ -88,6 +89,12 @@ router.post('/topics', async (req: AuthRequest, res) => {
         _count: { select: { comments: true } },
       },
     });
+
+    // Auto-subscribe author to their topic
+    await prisma.topicSubscription.create({
+      data: { userId: req.user!.id, topicId: topic.id },
+    }).catch(() => {});
+
     res.json(topic);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -117,10 +124,58 @@ router.post('/topics/:id/comments', async (req: AuthRequest, res) => {
       },
       include: { user: { select: { id: true, name: true, image: true } } },
     });
+
+    // Auto-subscribe commenter (silently ignore if already subscribed)
+    await prisma.topicSubscription.create({
+      data: { userId: req.user!.id, topicId: req.params.id },
+    }).catch(() => {});
+
+    // Notify all subscribers except the commenter
+    await notifyTopicSubscribers(req.params.id, req.user!.id, comment.user.name || 'Someone', topic.title);
+
     res.json(comment);
   } catch (error) {
     console.error('Topic comment error:', error);
-    res.status(500).json({ error: 'Greška' });
+    res.status(500).json({ error: 'Error' });
+  }
+});
+
+// Subscribe to topic
+router.post('/topics/:id/subscribe', async (req: AuthRequest, res) => {
+  try {
+    await prisma.topicSubscription.upsert({
+      where: { userId_topicId: { userId: req.user!.id, topicId: req.params.id } },
+      create: { userId: req.user!.id, topicId: req.params.id },
+      update: {},
+    });
+    res.json({ subscribed: true });
+  } catch (error) {
+    console.error('Subscribe error:', error);
+    res.status(500).json({ error: 'Error' });
+  }
+});
+
+// Unsubscribe from topic
+router.delete('/topics/:id/subscribe', async (req: AuthRequest, res) => {
+  try {
+    await prisma.topicSubscription.deleteMany({
+      where: { userId: req.user!.id, topicId: req.params.id },
+    });
+    res.json({ subscribed: false });
+  } catch (error) {
+    res.status(500).json({ error: 'Error' });
+  }
+});
+
+// Get subscription status
+router.get('/topics/:id/subscription', async (req: AuthRequest, res) => {
+  try {
+    const sub = await prisma.topicSubscription.findUnique({
+      where: { userId_topicId: { userId: req.user!.id, topicId: req.params.id } },
+    });
+    res.json({ subscribed: !!sub });
+  } catch (error) {
+    res.status(500).json({ error: 'Error' });
   }
 });
 

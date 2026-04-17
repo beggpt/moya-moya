@@ -59,13 +59,13 @@ export default function SOSButton() {
     return (
       <div className="fixed inset-0 bg-danger/95 z-50 flex flex-col items-center justify-center text-white p-8">
         <div className="text-6xl mb-6">✓</div>
-        <h2 className="text-2xl font-bold mb-4">SOS poslan</h2>
+        <h2 className="text-2xl font-bold mb-4">SOS sent</h2>
         <p className="text-lg text-center opacity-90">
-          Vaši kontakti su obaviješteni. Ostanite mirni.
+          Your contacts have been notified. Stay calm.
         </p>
-        <p className="mt-6 text-lg font-semibold">Hitna pomoć: 194</p>
-        <a href="tel:194" className="mt-4 btn-primary bg-white text-danger text-lg px-8">
-          <Phone className="w-5 h-5 mr-2" /> Pozovi 194
+        <p className="mt-6 text-lg font-semibold">Emergency: 911</p>
+        <a href="tel:911" className="mt-4 btn-primary bg-white text-danger text-lg px-8">
+          <Phone className="w-5 h-5 mr-2" /> Call 911
         </a>
       </div>
     );
@@ -78,16 +78,16 @@ export default function SOSButton() {
           <div className="w-20 h-20 bg-danger rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-white text-3xl font-bold">{countdown}</span>
           </div>
-          <h2 className="text-xl font-bold text-neutral-800 mb-2">Slanje SOS upozorenja</h2>
+          <h2 className="text-xl font-bold text-neutral-800 mb-2">Sending SOS alert</h2>
           <p className="text-neutral-600 mb-6">
-            {sending ? 'Šalje se...' : 'Vaši kontakti će biti obaviješteni za lokaciju i stanje.'}
+            {sending ? 'Sending...' : 'Your contacts will be notified of your location and status.'}
           </p>
           <button
             onClick={cancel}
             className="btn-secondary w-full text-lg"
             disabled={sending}
           >
-            Odustani
+            Cancel
           </button>
         </div>
       </div>
@@ -98,8 +98,8 @@ export default function SOSButton() {
     <button
       onClick={() => setShowConfirm(true)}
       className="sos-button"
-      aria-label="SOS - hitna pomoć"
-      title="SOS - pošalji upozorenje hitnim kontaktima"
+      aria-label="SOS - emergency help"
+      title="SOS - send alert to emergency contacts"
     >
       SOS
     </button>

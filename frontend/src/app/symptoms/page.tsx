@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { hr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { Plus, Filter, Mic, X } from 'lucide-react';
 import api from '@/lib/api';
 import { SymptomLog, SymptomType, SYMPTOM_LABELS, SYMPTOM_ICONS } from '@/types';
@@ -94,11 +94,11 @@ export default function SymptomsPage() {
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-2xl font-bold text-neutral-900">Simptomi</h1>
-                <p className="text-neutral-500">Ukupno {total} zapisa</p>
+                <h1 className="text-2xl font-bold text-neutral-900">Symptoms</h1>
+                <p className="text-neutral-500">{total} total entries</p>
               </div>
               <button onClick={() => setShowForm(true)} className="btn-primary">
-                <Plus className="w-5 h-5 mr-2" /> Novi zapis
+                <Plus className="w-5 h-5 mr-2" /> New entry
               </button>
             </div>
 
@@ -109,7 +109,7 @@ export default function SymptomsPage() {
                 onClick={() => { setFilterType(''); setPage(1); }}
                 className={`badge ${!filterType ? 'bg-primary-100 text-primary-800' : 'bg-neutral-100 text-neutral-600'} cursor-pointer`}
               >
-                Svi
+                All
               </button>
               {Object.entries(SYMPTOM_LABELS).map(([key, label]) => (
                 <button
@@ -125,12 +125,12 @@ export default function SymptomsPage() {
             {/* Symptom list */}
             <div className="space-y-3">
               {loading ? (
-                <p className="text-neutral-500">Učitavanje...</p>
+                <p className="text-neutral-500">Loading...</p>
               ) : symptoms.length === 0 ? (
                 <div className="card text-center py-12">
-                  <p className="text-neutral-500">Nema zabilježenih simptoma</p>
+                  <p className="text-neutral-500">No symptoms logged</p>
                   <button onClick={() => setShowForm(true)} className="btn-primary mt-4">
-                    <Plus className="w-5 h-5 mr-2" /> Zabilježi prvi simptom
+                    <Plus className="w-5 h-5 mr-2" /> Log your first symptom
                   </button>
                 </div>
               ) : (
@@ -145,12 +145,12 @@ export default function SymptomsPage() {
                         <span className={`badge text-xs ${SEVERITY_COLORS[s.severity]}`}>
                           {s.severity}/10
                         </span>
-                        {s.wasEmergency && <span className="badge-danger text-xs">Hitno</span>}
+                        {s.wasEmergency && <span className="badge-danger text-xs">Emergency</span>}
                       </div>
                       <p className="text-xs text-neutral-500">
-                        {format(new Date(s.timestamp), 'd.M.yyyy HH:mm', { locale: hr })}
+                        {format(new Date(s.timestamp), 'M/d/yyyy h:mm a', { locale: enUS })}
                         {s.durationMin && ` · ${s.durationMin} min`}
-                        {s.trigger && ` · Okidač: ${s.trigger}`}
+                        {s.trigger && ` · Trigger: ${s.trigger}`}
                       </p>
                       {s.notes && <p className="text-sm text-neutral-600 mt-1">{s.notes}</p>}
                     </div>
@@ -167,17 +167,17 @@ export default function SymptomsPage() {
                   disabled={page === 1}
                   className="btn-ghost"
                 >
-                  Prethodna
+                  Previous
                 </button>
                 <span className="px-4 py-2 text-sm text-neutral-600">
-                  Stranica {page} od {Math.ceil(total / 20)}
+                  Page {page} of {Math.ceil(total / 20)}
                 </span>
                 <button
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page >= Math.ceil(total / 20)}
                   className="btn-ghost"
                 >
-                  Sljedeća
+                  Next
                 </button>
               </div>
             )}
@@ -187,7 +187,7 @@ export default function SymptomsPage() {
               <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
                 <div className="bg-white rounded-3xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-neutral-900">Novi simptom</h2>
+                    <h2 className="text-xl font-bold text-neutral-900">New symptom</h2>
                     <button onClick={() => { setShowForm(false); resetForm(); }} className="p-2 hover:bg-neutral-100 rounded-lg">
                       <X className="w-5 h-5" />
                     </button>
@@ -196,7 +196,7 @@ export default function SymptomsPage() {
                   <form onSubmit={handleSubmit} className="space-y-5">
                     {/* Type */}
                     <div>
-                      <label className="label">Tip simptoma</label>
+                      <label className="label">Symptom type</label>
                       <div className="grid grid-cols-3 gap-2">
                         {Object.entries(SYMPTOM_LABELS).map(([key, label]) => (
                           <button
@@ -217,62 +217,62 @@ export default function SymptomsPage() {
 
                     {/* Severity */}
                     <div>
-                      <label className="label">Ozbiljnost: {formSeverity}/10</label>
+                      <label className="label">Severity: {formSeverity}/10</label>
                       <input
                         type="range" min="1" max="10" value={formSeverity}
                         onChange={(e) => setFormSeverity(parseInt(e.target.value))}
                         className="w-full h-3 rounded-full appearance-none cursor-pointer accent-primary-500"
                       />
                       <div className="flex justify-between text-xs text-neutral-400 mt-1">
-                        <span>Blago</span><span>Umjereno</span><span>Teško</span>
+                        <span>Mild</span><span>Moderate</span><span>Severe</span>
                       </div>
                     </div>
 
                     {/* Duration */}
                     <div>
-                      <label htmlFor="duration" className="label">Trajanje (minuta)</label>
+                      <label htmlFor="duration" className="label">Duration (minutes)</label>
                       <input
                         id="duration" type="number" value={formDuration}
                         onChange={(e) => setFormDuration(e.target.value)}
-                        className="input" placeholder="npr. 15"
+                        className="input" placeholder="e.g. 15"
                       />
                     </div>
 
                     {/* Trigger */}
                     <div>
-                      <label htmlFor="trigger" className="label">Okidač</label>
+                      <label htmlFor="trigger" className="label">Trigger</label>
                       <select
                         id="trigger" value={formTrigger}
                         onChange={(e) => setFormTrigger(e.target.value)}
                         className="input"
                       >
-                        <option value="">Odaberi...</option>
-                        <option value="dehidracija">Dehidracija</option>
-                        <option value="stres">Stres</option>
-                        <option value="vježba">Vježba</option>
-                        <option value="umor">Umor</option>
-                        <option value="vrućina">Vrućina</option>
-                        <option value="hiperventilacija">Hiperventilacija</option>
-                        <option value="plakanje">Plakanje</option>
-                        <option value="nepoznato">Nepoznato</option>
+                        <option value="">Select...</option>
+                        <option value="dehydration">Dehydration</option>
+                        <option value="stress">Stress</option>
+                        <option value="exercise">Exercise</option>
+                        <option value="fatigue">Fatigue</option>
+                        <option value="heat">Heat</option>
+                        <option value="hyperventilation">Hyperventilation</option>
+                        <option value="crying">Crying</option>
+                        <option value="unknown">Unknown</option>
                       </select>
                     </div>
 
                     {/* Notes */}
                     <div>
-                      <label htmlFor="notes" className="label">Bilješke</label>
+                      <label htmlFor="notes" className="label">Notes</label>
                       <div className="relative">
                         <textarea
                           id="notes" value={formNotes}
                           onChange={(e) => setFormNotes(e.target.value)}
                           className="input min-h-[80px] pr-12" rows={3}
-                          placeholder="Dodatne bilješke..."
+                          placeholder="Additional notes..."
                         />
                         <button
                           type="button"
                           className="absolute right-3 bottom-3 p-2 text-neutral-400 hover:text-primary-500 rounded-lg hover:bg-primary-50"
-                          aria-label="Glasovni unos"
-                          title="Glasovni unos"
+                          aria-label="Voice input"
+                          title="Voice input"
                         >
                           <Mic className="w-5 h-5" />
                         </button>
@@ -286,11 +286,11 @@ export default function SymptomsPage() {
                         onChange={(e) => setFormEmergency(e.target.checked)}
                         className="w-5 h-5 rounded border-neutral-300 text-danger focus:ring-danger"
                       />
-                      <span className="text-sm text-neutral-700">Označi kao hitan slučaj</span>
+                      <span className="text-sm text-neutral-700">Mark as emergency</span>
                     </label>
 
                     <button type="submit" disabled={saving} className="btn-primary w-full">
-                      {saving ? 'Spremanje...' : 'Spremi simptom'}
+                      {saving ? 'Saving...' : 'Save symptom'}
                     </button>
                   </form>
                 </div>

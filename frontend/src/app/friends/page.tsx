@@ -62,14 +62,14 @@ function Avatar({ name }: { name: string }) {
 function MoyamoyaBadge({ type }: { type: 'disease' | 'syndrome' }) {
   return (
     <span className={`badge text-xs ${type === 'disease' ? 'bg-teal-50 text-teal-700' : 'bg-purple-50 text-purple-700'}`}>
-      {type === 'disease' ? 'Bolest' : 'Sindrom'}
+      {type === 'disease' ? 'Disease' : 'Syndrome'}
     </span>
   );
 }
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('hr-HR', { month: 'long', year: 'numeric' });
+  return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 }
 
 export default function FriendsPage() {
@@ -165,16 +165,16 @@ export default function FriendsPage() {
   };
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
-    { key: 'friends', label: 'Prijatelji', icon: <Users size={18} /> },
-    { key: 'requests', label: 'Zahtjevi', icon: <UserPlus size={18} /> },
-    { key: 'search', label: 'Pretrazi', icon: <Search size={18} /> },
+    { key: 'friends', label: 'Friends', icon: <Users size={18} /> },
+    { key: 'requests', label: 'Requests', icon: <UserPlus size={18} /> },
+    { key: 'search', label: 'Search', icon: <Search size={18} /> },
   ];
 
   return (
     <div className="max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-neutral-900">Prijatelji</h1>
-        <p className="text-neutral-500 mt-1">Povezite se s drugim moyamoya pacijentima, dijelite iskustva i pruzajte podrsku.</p>
+        <h1 className="text-2xl font-bold text-neutral-900">Friends</h1>
+        <p className="text-neutral-500 mt-1">Connect with other moyamoya patients, share experiences, and offer support.</p>
       </div>
 
       {/* Tabs */}
@@ -204,12 +204,12 @@ export default function FriendsPage() {
       {tab === 'friends' && (
         <div className="space-y-4">
           {loading ? (
-            <div className="text-center py-12 text-neutral-500">Ucitavanje...</div>
+            <div className="text-center py-12 text-neutral-500">Loading...</div>
           ) : friends.length === 0 ? (
             <div className="text-center py-12">
               <Users size={48} className="mx-auto text-neutral-300 mb-4" />
-              <p className="text-neutral-500">Nemate jos prijatelja.</p>
-              <p className="text-neutral-400 text-sm mt-1">Pretrazite korisnike i posaljite zahtjev za prijateljstvo.</p>
+              <p className="text-neutral-500">You don't have any friends yet.</p>
+              <p className="text-neutral-400 text-sm mt-1">Search for users and send a friend request.</p>
             </div>
           ) : (
             friends.map((friend) => (
@@ -219,22 +219,22 @@ export default function FriendsPage() {
                   <h3 className="font-semibold text-neutral-900">{friend.name}</h3>
                   <div className="flex items-center gap-2 mt-1">
                     <MoyamoyaBadge type={friend.moyamoyaType} />
-                    <span className="text-xs text-neutral-500">Suzuki stadij {friend.suzukiStage}</span>
+                    <span className="text-xs text-neutral-500">Suzuki stage {friend.suzukiStage}</span>
                     <span className="text-xs text-neutral-400">|</span>
-                    <span className="text-xs text-neutral-500">Dijagnoza: {formatDate(friend.diagnosisDate)}</span>
+                    <span className="text-xs text-neutral-500">Diagnosis: {formatDate(friend.diagnosisDate)}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <button className="btn-ghost text-sm flex items-center gap-1.5">
                     <MessageCircle size={16} />
-                    Poruka
+                    Message
                   </button>
                   <button
                     onClick={() => removeFriend(friend.id)}
                     className="btn-danger text-sm flex items-center gap-1.5"
                   >
                     <Trash2 size={16} />
-                    Ukloni
+                    Remove
                   </button>
                 </div>
               </div>
@@ -247,11 +247,11 @@ export default function FriendsPage() {
       {tab === 'requests' && (
         <div className="space-y-4">
           {loading ? (
-            <div className="text-center py-12 text-neutral-500">Ucitavanje...</div>
+            <div className="text-center py-12 text-neutral-500">Loading...</div>
           ) : requests.length === 0 ? (
             <div className="text-center py-12">
               <UserPlus size={48} className="mx-auto text-neutral-300 mb-4" />
-              <p className="text-neutral-500">Nemate zahtjeva za prijateljstvo.</p>
+              <p className="text-neutral-500">No friend requests.</p>
             </div>
           ) : (
             requests.map((req) => (
@@ -259,7 +259,7 @@ export default function FriendsPage() {
                 <Avatar name={req.name} />
                 <div className="flex-1">
                   <h3 className="font-semibold text-neutral-900">{req.name}</h3>
-                  <p className="text-sm text-neutral-500 mt-0.5">Zeli se povezati s vama</p>
+                  <p className="text-sm text-neutral-500 mt-0.5">Wants to connect with you</p>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -267,14 +267,14 @@ export default function FriendsPage() {
                     className="btn-primary text-sm flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600"
                   >
                     <UserCheck size={16} />
-                    Prihvati
+                    Accept
                   </button>
                   <button
                     onClick={() => rejectRequest(req.id)}
                     className="btn-danger text-sm flex items-center gap-1.5"
                   >
                     <UserX size={16} />
-                    Odbij
+                    Decline
                   </button>
                 </div>
               </div>
@@ -294,28 +294,28 @@ export default function FriendsPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
-                placeholder="Pretrazite korisnike po imenu..."
+                placeholder="Search users by name..."
                 className="input pl-10"
               />
             </div>
             <button onClick={handleSearch} className="btn-primary flex items-center gap-2">
               <Search size={18} />
-              Pretrazi
+              Search
             </button>
           </div>
 
           <div className="space-y-4">
             {loading ? (
-              <div className="text-center py-12 text-neutral-500">Pretrazivanje...</div>
+              <div className="text-center py-12 text-neutral-500">Searching...</div>
             ) : searchResults.length === 0 && searchQuery ? (
               <div className="text-center py-12">
                 <Search size={48} className="mx-auto text-neutral-300 mb-4" />
-                <p className="text-neutral-500">Nema rezultata za &quot;{searchQuery}&quot;</p>
+                <p className="text-neutral-500">No results for &quot;{searchQuery}&quot;</p>
               </div>
             ) : searchResults.length === 0 ? (
               <div className="text-center py-12">
                 <Search size={48} className="mx-auto text-neutral-300 mb-4" />
-                <p className="text-neutral-500">Unesite ime korisnika za pretrazivanje.</p>
+                <p className="text-neutral-500">Enter a user's name to search.</p>
               </div>
             ) : (
               searchResults.map((user) => (
@@ -325,9 +325,9 @@ export default function FriendsPage() {
                     <h3 className="font-semibold text-neutral-900">{user.name}</h3>
                     <div className="flex items-center gap-2 mt-1">
                       <MoyamoyaBadge type={user.moyamoyaType} />
-                      <span className="text-xs text-neutral-500">Suzuki stadij {user.suzukiStage}</span>
+                      <span className="text-xs text-neutral-500">Suzuki stage {user.suzukiStage}</span>
                       <span className="text-xs text-neutral-400">|</span>
-                      <span className="text-xs text-neutral-500">Dijagnoza: {formatDate(user.diagnosisDate)}</span>
+                      <span className="text-xs text-neutral-500">Diagnosis: {formatDate(user.diagnosisDate)}</span>
                     </div>
                   </div>
                   <div>
@@ -337,13 +337,13 @@ export default function FriendsPage() {
                         className="btn-primary text-sm flex items-center gap-1.5"
                       >
                         <UserPlus size={16} />
-                        Dodaj prijatelja
+                        Add friend
                       </button>
                     )}
                     {user.friendshipStatus === 'pending_sent' && (
                       <button disabled className="btn-ghost text-sm flex items-center gap-1.5 opacity-60 cursor-default">
                         <UserCheck size={16} />
-                        Zahtjev poslan
+                        Request sent
                       </button>
                     )}
                     {user.friendshipStatus === 'pending_received' && (
@@ -352,13 +352,13 @@ export default function FriendsPage() {
                         className="btn-primary text-sm flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600"
                       >
                         <UserCheck size={16} />
-                        Prihvati
+                        Accept
                       </button>
                     )}
                     {user.friendshipStatus === 'friends' && (
                       <span className="text-sm text-emerald-600 font-medium flex items-center gap-1.5">
                         <UserCheck size={16} />
-                        Prijatelji
+                        Friends
                       </span>
                     )}
                   </div>

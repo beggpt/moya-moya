@@ -25,7 +25,7 @@ export default function LoginPage() {
       setAuth(data.user, data.token);
       router.push(data.user.role === 'ADMIN' ? '/admin' : '/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Greška pri prijavi');
+      setError(err.response?.data?.error || 'Sign in error');
     } finally {
       setLoading(false);
     }
@@ -34,7 +34,7 @@ export default function LoginPage() {
   const handleGoogle = async () => {
     // Google OAuth will be implemented with the Google Sign-In button
     // For now, placeholder
-    setError('Google prijava bit će dostupna uskoro');
+    setError('Google sign in will be available soon');
   };
 
   return (
@@ -47,8 +47,8 @@ export default function LoginPage() {
               <span className="text-white font-bold text-xl">M</span>
             </div>
           </Link>
-          <h1 className="text-2xl font-bold text-neutral-900 mt-4">Dobrodošli natrag</h1>
-          <p className="text-neutral-600 mt-2">Prijavite se u MoyaMoya Companion</p>
+          <h1 className="text-2xl font-bold text-neutral-900 mt-4">Welcome back</h1>
+          <p className="text-neutral-600 mt-2">Sign in to MoyaMoya Companion</p>
         </div>
 
         <div className="card">
@@ -63,12 +63,12 @@ export default function LoginPage() {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
-            Nastavi s Google računom
+            Continue with Google
           </button>
 
           <div className="flex items-center gap-4 my-6">
             <div className="flex-1 h-px bg-neutral-200" />
-            <span className="text-xs text-neutral-500">ili</span>
+            <span className="text-xs text-neutral-500">or</span>
             <div className="flex-1 h-px bg-neutral-200" />
           </div>
 
@@ -88,14 +88,14 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="input"
-                placeholder="vas@email.com"
+                placeholder="you@email.com"
                 required
                 autoComplete="email"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="label">Lozinka</label>
+              <label htmlFor="password" className="label">Password</label>
               <div className="relative">
                 <input
                   id="password"
@@ -103,7 +103,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="input pr-12"
-                  placeholder="Min. 8 znakova"
+                  placeholder="Min. 8 characters"
                   required
                   autoComplete="current-password"
                 />
@@ -111,7 +111,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 p-1"
-                  aria-label={showPassword ? 'Sakrij lozinku' : 'Prikaži lozinku'}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -120,20 +120,20 @@ export default function LoginPage() {
 
             <div className="flex justify-end">
               <Link href="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
-                Zaboravljena lozinka?
+                Forgot password?
               </Link>
             </div>
 
             <button type="submit" disabled={loading} className="btn-primary w-full">
-              {loading ? 'Prijava...' : 'Prijavi se'}
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
         </div>
 
         <p className="text-center text-sm text-neutral-600 mt-6">
-          Nemate račun?{' '}
+          Don't have an account?{' '}
           <Link href="/register" className="text-primary-600 hover:text-primary-700 font-medium">
-            Registrirajte se
+            Sign up
           </Link>
         </p>
       </div>

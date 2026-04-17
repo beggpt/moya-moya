@@ -19,6 +19,8 @@ import adminRoutes from './routes/admin';
 import postRoutes from './routes/posts';
 import forumRoutes from './routes/forum';
 import friendRoutes from './routes/friends';
+import notificationRoutes from './routes/notifications';
+import newsRoutes from './routes/news';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -46,6 +48,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/friends', friendRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/news', newsRoutes);
 
 // Educational content (public)
 app.get('/api/content', async (_req, res) => {

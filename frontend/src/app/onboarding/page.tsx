@@ -6,12 +6,12 @@ import { ChevronRight, ChevronLeft, Check, Info, X } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 
-const steps = ['Osobni podaci', 'Dijagnoza', 'Operacija', 'Lijekovi', 'Hitni kontakt'];
+const steps = ['Personal info', 'Diagnosis', 'Surgery', 'Medications', 'Emergency contact'];
 
 const FREQUENCY_OPTIONS = [
-  { value: '1x dnevno', label: 'Jednom dnevno', times: 1 },
-  { value: '2x dnevno', label: 'Dva puta dnevno', times: 2 },
-  { value: '3x dnevno', label: 'Tri puta dnevno', times: 3 },
+  { value: '1x dnevno', label: 'Once daily', times: 1 },
+  { value: '2x dnevno', label: 'Twice daily', times: 2 },
+  { value: '3x dnevno', label: 'Three times daily', times: 3 },
 ];
 
 /** DD/MM/YYYY date input that stores ISO (YYYY-MM-DD) internally */
@@ -79,7 +79,7 @@ function DateInput({ value, onChange, className }: { value: string; onChange: (i
       value={display}
       onChange={handleChange}
       onBlur={handleBlur}
-      placeholder="DD/MM/GGGG"
+      placeholder="DD/MM/YYYY"
       className={className || 'input'}
       maxLength={10}
     />
@@ -180,7 +180,7 @@ export default function OnboardingPage() {
       router.push('/dashboard');
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.error || 'Greška pri spremanju. Pokušajte ponovo.');
+      setError(err.response?.data?.error || 'Error saving. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -211,7 +211,7 @@ export default function OnboardingPage() {
 
         <div className="card">
           <h2 className="text-xl font-bold text-neutral-900 mb-1">{steps[step]}</h2>
-          <p className="text-sm text-neutral-500 mb-6">Korak {step + 1} od {steps.length}</p>
+          <p className="text-sm text-neutral-500 mb-6">Step {step + 1} of {steps.length}</p>
 
           {error && (
             <div className="bg-red-50 text-danger text-sm px-4 py-3 rounded-xl mb-4">{error}</div>
@@ -221,25 +221,25 @@ export default function OnboardingPage() {
           {step === 0 && (
             <div className="space-y-4">
               <div>
-                <label className="label">Datum rođenja</label>
+                <label className="label">Date of birth</label>
                 <DateInput value={profile.dateOfBirth} onChange={(v) => updateProfile('dateOfBirth', v)} />
               </div>
               <div>
-                <label className="label">Spol</label>
+                <label className="label">Gender</label>
                 <select value={profile.gender} onChange={(e) => updateProfile('gender', e.target.value)} className="input">
-                  <option value="">Odaberi...</option>
-                  <option value="male">Muško</option>
-                  <option value="female">Žensko</option>
-                  <option value="other">Ostalo</option>
+                  <option value="">Select...</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Visina (cm)</label>
+                  <label className="label">Height (cm)</label>
                   <input type="number" value={profile.height} onChange={(e) => updateProfile('height', e.target.value)} className="input" placeholder="170" />
                 </div>
                 <div>
-                  <label className="label">Težina (kg)</label>
+                  <label className="label">Weight (kg)</label>
                   <input type="number" value={profile.weight} onChange={(e) => updateProfile('weight', e.target.value)} className="input" placeholder="70" />
                 </div>
               </div>
@@ -250,20 +250,20 @@ export default function OnboardingPage() {
           {step === 1 && (
             <div className="space-y-4">
               <div>
-                <label className="label">Datum dijagnoze</label>
+                <label className="label">Date of diagnosis</label>
                 <DateInput value={profile.diagnosisDate} onChange={(v) => updateProfile('diagnosisDate', v)} />
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <label className="label mb-0">Tip</label>
+                  <label className="label mb-0">Type</label>
                   <button
                     type="button"
                     onClick={() => setInfoModal({
-                      title: 'Bolest ili Sindrom?',
-                      text: 'Moyamoya bolest (idiopatska) znači da je suženje arterija primarno i nema poznati uzrok. Moyamoya sindrom znači da je suženje sekundarno — nastalo kao posljedica druge bolesti ili stanja (npr. nakon radioterapije, srpaste anemije i sl.). Vaš neurolog ili neurokirurg vam može potvrditi o kojem se tipu radi na temelju vaše dijagnostike.',
+                      title: 'Disease or Syndrome?',
+                      text: 'Moyamoya disease (idiopathic) means the narrowing of the arteries is primary and has no known cause. Moyamoya syndrome means the narrowing is secondary — caused by another disease or condition (e.g., after radiotherapy, sickle cell anemia, etc.). Your neurologist or neurosurgeon can confirm which type you have based on your diagnostics.',
                     })}
                     className="p-1 hover:bg-neutral-100 rounded-lg transition-colors"
-                    aria-label="Više informacija o tipu"
+                    aria-label="More information about type"
                   >
                     <Info size={16} className="text-primary-500" />
                   </button>
@@ -275,23 +275,23 @@ export default function OnboardingPage() {
                         profile.moyamoyaType === t ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300'
                       }`}
                     >
-                      <p className="font-semibold text-neutral-800">{t === 'DISEASE' ? 'Bolest' : 'Sindrom'}</p>
-                      <p className="text-xs text-neutral-500 mt-1">{t === 'DISEASE' ? 'Idiopatska (primarno suženje)' : 'Sekundarna (poznati uzrok)'}</p>
+                      <p className="font-semibold text-neutral-800">{t === 'DISEASE' ? 'Disease' : 'Syndrome'}</p>
+                      <p className="text-xs text-neutral-500 mt-1">{t === 'DISEASE' ? 'Idiopathic (primary narrowing)' : 'Secondary (known cause)'}</p>
                     </button>
                   ))}
                 </div>
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <label className="label mb-0">Suzuki stadij (1-6)</label>
+                  <label className="label mb-0">Suzuki stage (1-6)</label>
                   <button
                     type="button"
                     onClick={() => setInfoModal({
-                      title: 'Suzuki stadij',
-                      text: 'Suzuki klasifikacija (1-6) opisuje stupanj napredovanja moyamoya bolesti na angiografiji. Stadij 1 je blagi (početno suženje), a stadij 6 je najteži (potpuni gubitak moyamoya vaskulature). Vaš stadij određuje neurolog na temelju cerebralne angiografije ili MR angiografije. Ako niste sigurni, pitajte svog neurologa na sljedećem pregledu.',
+                      title: 'Suzuki stage',
+                      text: 'The Suzuki classification (1-6) describes the degree of progression of moyamoya disease on angiography. Stage 1 is mild (initial narrowing), while stage 6 is the most severe (complete loss of moyamoya vasculature). Your stage is determined by a neurologist based on cerebral angiography or MR angiography. If you are unsure, ask your neurologist at your next appointment.',
                     })}
                     className="p-1 hover:bg-neutral-100 rounded-lg transition-colors"
-                    aria-label="Više informacija o Suzuki stadiju"
+                    aria-label="More information about Suzuki stage"
                   >
                     <Info size={16} className="text-primary-500" />
                   </button>
@@ -307,9 +307,9 @@ export default function OnboardingPage() {
                 </div>
               </div>
               <div>
-                <label className="label">Zahvaćena strana</label>
+                <label className="label">Affected side</label>
                 <div className="grid grid-cols-3 gap-3">
-                  {([['LEFT', 'Lijeva'], ['RIGHT', 'Desna'], ['BILATERAL', 'Obostrana']] as const).map(([val, label]) => (
+                  {([['LEFT', 'Left'], ['RIGHT', 'Right'], ['BILATERAL', 'Bilateral']] as const).map(([val, label]) => (
                     <button key={val} type="button" onClick={() => updateProfile('affectedSide', val)}
                       className={`p-3 rounded-xl border text-center text-sm font-medium transition-all ${
                         profile.affectedSide === val ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-neutral-200 text-neutral-600'
@@ -325,54 +325,54 @@ export default function OnboardingPage() {
           {step === 2 && (
             <div className="space-y-4">
               <div>
-                <label className="label">Jeste li imali operaciju?</label>
+                <label className="label">Have you had surgery?</label>
                 <div className="grid grid-cols-2 gap-3">
                   {[true, false].map((val) => (
                     <button key={String(val)} type="button" onClick={() => updateProfile('hadSurgery', val)}
                       className={`p-4 rounded-xl border text-center font-medium transition-all ${
                         profile.hadSurgery === val ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-neutral-200 text-neutral-600'
                       }`}
-                    >{val ? 'Da' : 'Ne'}</button>
+                    >{val ? 'Yes' : 'No'}</button>
                   ))}
                 </div>
               </div>
               {profile.hadSurgery && (
                 <>
                   <div>
-                    <label className="label">Tip operacije</label>
+                    <label className="label">Surgery type</label>
                     <select value={profile.surgeryType} onChange={(e) => updateProfile('surgeryType', e.target.value)} className="input">
-                      <option value="">Odaberi...</option>
-                      <option value="STA-MCA bypass (direktni)">STA-MCA bypass (direktni)</option>
-                      <option value="EDAS (indirektni)">EDAS (indirektni)</option>
-                      <option value="EMS (indirektni)">EMS (indirektni)</option>
-                      <option value="EDMS (indirektni)">EDMS (indirektni)</option>
-                      <option value="Kombinirani (direktni + indirektni)">Kombinirani (direktni + indirektni)</option>
-                      <option value="Ostalo">Ostalo</option>
+                      <option value="">Select...</option>
+                      <option value="STA-MCA bypass (direct)">STA-MCA bypass (direct)</option>
+                      <option value="EDAS (indirect)">EDAS (indirect)</option>
+                      <option value="EMS (indirect)">EMS (indirect)</option>
+                      <option value="EDMS (indirect)">EDMS (indirect)</option>
+                      <option value="Combined (direct + indirect)">Combined (direct + indirect)</option>
+                      <option value="Other">Other</option>
                     </select>
                   </div>
 
                   {profile.affectedSide === 'BILATERAL' ? (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="label">Operacija — lijeva</label>
+                        <label className="label">Surgery — left</label>
                         <DateInput value={profile.surgeryDateLeft} onChange={(v) => updateProfile('surgeryDateLeft', v)} />
                       </div>
                       <div>
-                        <label className="label">Operacija — desna</label>
+                        <label className="label">Surgery — right</label>
                         <DateInput value={profile.surgeryDateRight} onChange={(v) => updateProfile('surgeryDateRight', v)} />
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <label className="label">Datum operacije</label>
+                      <label className="label">Surgery date</label>
                       <DateInput value={profile.surgeryDate} onChange={(v) => updateProfile('surgeryDate', v)} />
                     </div>
                   )}
                 </>
               )}
               <div>
-                <label className="label">Alergije</label>
-                <input type="text" value={profile.allergies} onChange={(e) => updateProfile('allergies', e.target.value)} className="input" placeholder="Nema / navedi alergije" />
+                <label className="label">Allergies</label>
+                <input type="text" value={profile.allergies} onChange={(e) => updateProfile('allergies', e.target.value)} className="input" placeholder="None / list allergies" />
               </div>
             </div>
           )}
@@ -380,19 +380,19 @@ export default function OnboardingPage() {
           {/* Step 3: Medications */}
           {step === 3 && (
             <div className="space-y-4">
-              <p className="text-sm text-neutral-600">Unesite lijekove koje trenutno uzimate. Postavite vrijeme za podsjetnike.</p>
+              <p className="text-sm text-neutral-600">Enter the medications you are currently taking. Set times for reminders.</p>
               {medications.map((med, idx) => (
                 <div key={idx} className="p-4 rounded-xl bg-neutral-50 space-y-3">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="label">Naziv lijeka</label>
+                      <label className="label">Medication name</label>
                       <input type="text" value={med.name}
                         onChange={(e) => updateMedication(idx, 'name', e.target.value)}
                         className="input" placeholder="Aspirin"
                       />
                     </div>
                     <div>
-                      <label className="label">Doza</label>
+                      <label className="label">Dose</label>
                       <div className="flex gap-2">
                         <input type="text" value={med.dosage}
                           onChange={(e) => updateMedication(idx, 'dosage', e.target.value)}
@@ -410,7 +410,7 @@ export default function OnboardingPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="label">Učestalost</label>
+                    <label className="label">Frequency</label>
                     <select value={med.frequency}
                       onChange={(e) => updateMedication(idx, 'frequency', e.target.value)}
                       className="input"
@@ -421,7 +421,7 @@ export default function OnboardingPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="label">Vrijeme uzimanja (za podsjetnike)</label>
+                    <label className="label">Time of day (for reminders)</label>
                     <div className="flex gap-2 flex-wrap">
                       {(med.timesOfDay || []).map((time: string, tIdx: number) => (
                         <div key={tIdx} className="flex items-center gap-1">
@@ -439,7 +439,7 @@ export default function OnboardingPage() {
                 </div>
               ))}
               <button type="button" onClick={() => setMedications([...medications, { name: '', dosage: '', unit: 'mg', frequency: '1x dnevno', timesOfDay: ['08:00'] }])} className="btn-ghost w-full">
-                + Dodaj lijek
+                + Add medication
               </button>
             </div>
           )}
@@ -448,33 +448,33 @@ export default function OnboardingPage() {
           {step === 4 && (
             <div className="space-y-4">
               <div>
-                <label className="label">Ime kontakta za hitne slučajeve</label>
-                <input type="text" value={profile.emergencyContact} onChange={(e) => updateProfile('emergencyContact', e.target.value)} className="input" placeholder="Marko Horvat" />
+                <label className="label">Emergency contact name</label>
+                <input type="text" value={profile.emergencyContact} onChange={(e) => updateProfile('emergencyContact', e.target.value)} className="input" placeholder="John Doe" />
               </div>
               <div>
-                <label className="label">Telefon</label>
-                <input type="tel" value={profile.emergencyPhone} onChange={(e) => updateProfile('emergencyPhone', e.target.value)} className="input" placeholder="+385 91 123 4567" />
+                <label className="label">Phone</label>
+                <input type="tel" value={profile.emergencyPhone} onChange={(e) => updateProfile('emergencyPhone', e.target.value)} className="input" placeholder="+1 555 123 4567" />
               </div>
               <div>
-                <label className="label">Odnos</label>
+                <label className="label">Relationship</label>
                 <select value={profile.emergencyRelation} onChange={(e) => updateProfile('emergencyRelation', e.target.value)} className="input">
-                  <option value="">Odaberi...</option>
-                  <option value="Suprug/a">Suprug/a</option>
-                  <option value="Roditelj">Roditelj</option>
-                  <option value="Dijete">Dijete</option>
-                  <option value="Brat/Sestra">Brat/Sestra</option>
-                  <option value="Prijatelj">Prijatelj</option>
-                  <option value="Ostalo">Ostalo</option>
+                  <option value="">Select...</option>
+                  <option value="Spouse">Spouse</option>
+                  <option value="Parent">Parent</option>
+                  <option value="Child">Child</option>
+                  <option value="Sibling">Sibling</option>
+                  <option value="Friend">Friend</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
               <hr className="my-4" />
               <div>
-                <label className="label">Bolnica (opcionalno)</label>
-                <input type="text" value={profile.hospitalName} onChange={(e) => updateProfile('hospitalName', e.target.value)} className="input" placeholder="KBC Zagreb" />
+                <label className="label">Hospital (optional)</label>
+                <input type="text" value={profile.hospitalName} onChange={(e) => updateProfile('hospitalName', e.target.value)} className="input" placeholder="General Hospital" />
               </div>
               <div>
-                <label className="label">Neurolog (opcionalno)</label>
-                <input type="text" value={profile.neurologistName} onChange={(e) => updateProfile('neurologistName', e.target.value)} className="input" placeholder="Dr. Horvat" />
+                <label className="label">Neurologist (optional)</label>
+                <input type="text" value={profile.neurologistName} onChange={(e) => updateProfile('neurologistName', e.target.value)} className="input" placeholder="Dr. Smith" />
               </div>
             </div>
           )}
@@ -483,24 +483,24 @@ export default function OnboardingPage() {
           <div className="flex items-center justify-between mt-8">
             {step > 0 ? (
               <button onClick={() => setStep(step - 1)} className="btn-ghost">
-                <ChevronLeft className="w-5 h-5 mr-1" /> Natrag
+                <ChevronLeft className="w-5 h-5 mr-1" /> Back
               </button>
             ) : <div />}
 
             {step < steps.length - 1 ? (
               <button onClick={() => setStep(step + 1)} className="btn-primary">
-                Dalje <ChevronRight className="w-5 h-5 ml-1" />
+                Next <ChevronRight className="w-5 h-5 ml-1" />
               </button>
             ) : (
               <button onClick={handleComplete} disabled={saving} className="btn-primary">
-                {saving ? 'Spremanje...' : 'Završi'} <Check className="w-5 h-5 ml-1" />
+                {saving ? 'Saving...' : 'Finish'} <Check className="w-5 h-5 ml-1" />
               </button>
             )}
           </div>
         </div>
 
         <p className="text-center text-xs text-neutral-500 mt-4">
-          Sve podatke možete kasnije izmijeniti u postavkama profila.
+          You can edit all this information later in profile settings.
         </p>
       </div>
     </div>

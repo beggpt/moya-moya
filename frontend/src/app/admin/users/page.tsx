@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { hr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { Search, Download, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
@@ -48,7 +48,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  const roleLabels: Record<string, string> = { ADMIN: 'Admin', PATIENT: 'Pacijent', CAREGIVER: 'Skrbnik' };
+  const roleLabels: Record<string, string> = { ADMIN: 'Admin', PATIENT: 'Patient', CAREGIVER: 'Caregiver' };
   const roleBadgeClass: Record<string, string> = {
     ADMIN: 'badge bg-purple-100 text-purple-700',
     PATIENT: 'badge bg-primary-100 text-primary-700',
@@ -59,8 +59,8 @@ export default function AdminUsersPage() {
     <div className="max-w-6xl">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Korisnici</h1>
-          <p className="text-neutral-500">{total} ukupno</p>
+          <h1 className="text-2xl font-bold text-neutral-900">Users</h1>
+          <p className="text-neutral-500">{total} total</p>
         </div>
       </div>
 
@@ -71,7 +71,7 @@ export default function AdminUsersPage() {
           <input
             type="text" value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            placeholder="Pretraži ime ili email..."
+            placeholder="Search by name or email..."
             className="input pl-10"
           />
         </div>
@@ -80,10 +80,10 @@ export default function AdminUsersPage() {
           onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
           className="input w-auto"
         >
-          <option value="">Sve uloge</option>
-          <option value="PATIENT">Pacijenti</option>
-          <option value="CAREGIVER">Skrbnici</option>
-          <option value="ADMIN">Admini</option>
+          <option value="">All roles</option>
+          <option value="PATIENT">Patients</option>
+          <option value="CAREGIVER">Caregivers</option>
+          <option value="ADMIN">Admins</option>
         </select>
       </div>
 
@@ -92,19 +92,19 @@ export default function AdminUsersPage() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-neutral-200 bg-neutral-50">
-              <th className="text-left text-xs font-medium text-neutral-500 p-4">Korisnik</th>
-              <th className="text-left text-xs font-medium text-neutral-500 p-4">Uloga</th>
-              <th className="text-left text-xs font-medium text-neutral-500 p-4">Stadij</th>
-              <th className="text-left text-xs font-medium text-neutral-500 p-4">Simptomi</th>
-              <th className="text-left text-xs font-medium text-neutral-500 p-4">Zadnja aktivnost</th>
-              <th className="text-right text-xs font-medium text-neutral-500 p-4">Akcije</th>
+              <th className="text-left text-xs font-medium text-neutral-500 p-4">User</th>
+              <th className="text-left text-xs font-medium text-neutral-500 p-4">Role</th>
+              <th className="text-left text-xs font-medium text-neutral-500 p-4">Stage</th>
+              <th className="text-left text-xs font-medium text-neutral-500 p-4">Symptoms</th>
+              <th className="text-left text-xs font-medium text-neutral-500 p-4">Last activity</th>
+              <th className="text-right text-xs font-medium text-neutral-500 p-4">Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className="p-8 text-center text-neutral-500">Učitavanje...</td></tr>
+              <tr><td colSpan={6} className="p-8 text-center text-neutral-500">Loading...</td></tr>
             ) : users.length === 0 ? (
-              <tr><td colSpan={6} className="p-8 text-center text-neutral-500">Nema korisnika</td></tr>
+              <tr><td colSpan={6} className="p-8 text-center text-neutral-500">No users</td></tr>
             ) : (
               users.map((u) => (
                 <tr key={u.id} className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
@@ -119,7 +119,7 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="p-4">
                     <span className="text-sm text-neutral-700">
-                      {u.profile?.suzukiStage ? `Stadij ${u.profile.suzukiStage}` : '-'}
+                      {u.profile?.suzukiStage ? `Stage ${u.profile.suzukiStage}` : '-'}
                     </span>
                   </td>
                   <td className="p-4">
@@ -127,7 +127,7 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="p-4">
                     <span className="text-xs text-neutral-500">
-                      {u.lastLoginAt ? format(new Date(u.lastLoginAt), 'd.M.yyyy', { locale: hr }) : 'Nikad'}
+                      {u.lastLoginAt ? format(new Date(u.lastLoginAt), 'MMM d, yyyy', { locale: enUS }) : 'Never'}
                     </span>
                   </td>
                   <td className="p-4 text-right">
@@ -135,14 +135,14 @@ export default function AdminUsersPage() {
                       <button
                         onClick={() => handleExport(u.id)}
                         className="btn-ghost p-2"
-                        title="Izvezi CSV"
+                        title="Export CSV"
                       >
                         <Download className="w-4 h-4" />
                       </button>
                       <Link
                         href={`/admin/users/${u.id}`}
                         className="btn-ghost p-2"
-                        title="Detalji"
+                        title="Details"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Link>
@@ -159,11 +159,11 @@ export default function AdminUsersPage() {
       {total > 20 && (
         <div className="flex justify-center gap-2 mt-6">
           <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="btn-ghost">
-            Prethodna
+            Previous
           </button>
-          <span className="px-4 py-2 text-sm text-neutral-600">Stranica {page} od {Math.ceil(total / 20)}</span>
+          <span className="px-4 py-2 text-sm text-neutral-600">Page {page} of {Math.ceil(total / 20)}</span>
           <button onClick={() => setPage((p) => p + 1)} disabled={page >= Math.ceil(total / 20)} className="btn-ghost">
-            Sljedeća
+            Next
           </button>
         </div>
       )}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { hr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import {
   ArrowLeft,
   MessageSquare,
@@ -54,14 +54,14 @@ interface Topic {
 }
 
 const CATEGORY_LABELS: Record<ForumCategory, string> = {
-  GENERAL: 'Opcenito',
-  SYMPTOMS: 'Simptomi',
-  TREATMENT: 'Lijecenje',
-  SURGERY: 'Operacija',
-  LIFESTYLE: 'Zivotni stil',
-  MENTAL_HEALTH: 'Mentalno zdravlje',
-  CAREGIVERS: 'Skrbnici',
-  RESEARCH: 'Istrazivanje',
+  GENERAL: 'General',
+  SYMPTOMS: 'Symptoms',
+  TREATMENT: 'Treatment',
+  SURGERY: 'Surgery',
+  LIFESTYLE: 'Lifestyle',
+  MENTAL_HEALTH: 'Mental health',
+  CAREGIVERS: 'Caregivers',
+  RESEARCH: 'Research',
 };
 
 const CATEGORY_COLORS: Record<ForumCategory, string> = {
@@ -122,8 +122,8 @@ function CommentItem({
               {comment.user.name}
             </Link>
             <span className="text-xs text-neutral-400">
-              {format(new Date(comment.createdAt), 'd.M.yyyy HH:mm', {
-                locale: hr,
+              {format(new Date(comment.createdAt), 'M/d/yyyy h:mm a', {
+                locale: enUS,
               })}
             </span>
           </div>
@@ -139,7 +139,7 @@ function CommentItem({
                   : 'text-neutral-400 hover:text-primary-500'
               }`}
             >
-              <Reply className="w-3 h-3" /> Odgovori
+              <Reply className="w-3 h-3" /> Reply
             </button>
           )}
         </div>
@@ -182,7 +182,7 @@ export default function TopicDetailPage() {
       const { data } = await api.get(`/forum/topics/${topicId}`);
       setTopic(data);
     } catch (error) {
-      console.error('Greska pri ucitavanju teme:', error);
+      console.error('Error loading topic:', error);
     } finally {
       setLoading(false);
     }
@@ -201,7 +201,7 @@ export default function TopicDetailPage() {
       setReplyingTo(null);
       loadTopic();
     } catch (error) {
-      console.error('Greska pri slanju komentara:', error);
+      console.error('Error posting comment:', error);
     } finally {
       setSubmitting(false);
     }
@@ -243,10 +243,10 @@ export default function TopicDetailPage() {
     return (
       <div className="max-w-3xl">
         <button onClick={() => router.push('/forum')} className="btn-ghost mb-6">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Nazad na forum
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back to forum
         </button>
         <div className="card text-center py-12">
-          <p className="text-neutral-500">Tema nije pronadena</p>
+          <p className="text-neutral-500">Topic not found</p>
         </div>
       </div>
     );
@@ -261,7 +261,7 @@ export default function TopicDetailPage() {
     <div className="max-w-3xl">
       {/* Back button */}
       <button onClick={() => router.push('/forum')} className="btn-ghost mb-6">
-        <ArrowLeft className="w-4 h-4 mr-2" /> Nazad na forum
+        <ArrowLeft className="w-4 h-4 mr-2" /> Back to forum
       </button>
 
       {/* Topic header */}
@@ -279,8 +279,8 @@ export default function TopicDetailPage() {
               </Link>
               <span>·</span>
               <span>
-                {format(new Date(topic.createdAt), 'd. MMMM yyyy. u HH:mm', {
-                  locale: hr,
+                {format(new Date(topic.createdAt), "MMMM d, yyyy 'at' h:mm a", {
+                  locale: enUS,
                 })}
               </span>
               <span
@@ -301,14 +301,14 @@ export default function TopicDetailPage() {
         <div className="flex items-center gap-2 mb-4">
           <MessageSquare className="w-5 h-5 text-neutral-500" />
           <h2 className="font-semibold text-neutral-800">
-            Komentari ({topic._count.comments})
+            Comments ({topic._count.comments})
           </h2>
         </div>
 
         {threadedComments.length === 0 ? (
           <div className="card text-center py-8">
             <p className="text-neutral-400 text-sm">
-              Budi prvi koji ce komentirati
+              Be the first to comment
             </p>
           </div>
         ) : (
@@ -331,7 +331,7 @@ export default function TopicDetailPage() {
         {replyingToComment && (
           <div className="flex items-center justify-between bg-primary-50 rounded-xl px-3 py-2 mb-3 text-sm">
             <span className="text-primary-700">
-              Odgovaras na komentar korisnika{' '}
+              Replying to{' '}
               <span className="font-medium">{replyingToComment.user.name}</span>
             </span>
             <button
@@ -351,7 +351,7 @@ export default function TopicDetailPage() {
               className="input min-h-[48px] resize-none"
               rows={2}
               placeholder={
-                replyingTo ? 'Napisi odgovor...' : 'Napisi komentar...'
+                replyingTo ? 'Write a reply...' : 'Write a comment...'
               }
             />
           </div>
@@ -359,7 +359,7 @@ export default function TopicDetailPage() {
             type="submit"
             disabled={submitting || !commentText.trim()}
             className="btn-primary shrink-0 p-3"
-            aria-label="Posalji"
+            aria-label="Send"
           >
             {submitting ? (
               <Loader2 className="w-5 h-5 animate-spin" />

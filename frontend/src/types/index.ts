@@ -62,16 +62,16 @@ export type SymptomType =
 
 export const SYMPTOM_LABELS: Record<SymptomType, string> = {
   TIA: 'TIA',
-  HEADACHE: 'Glavobolja',
-  WEAKNESS: 'Slabost',
-  NUMBNESS: 'Utrnulost',
-  SPEECH_DIFFICULTY: 'Poteškoće s govorom',
-  VISION_CHANGE: 'Promjene vida',
-  SEIZURE: 'Napadaj',
-  DIZZINESS: 'Vrtoglavica',
-  CONFUSION: 'Konfuzija',
-  BALANCE_LOSS: 'Gubitak ravnoteže',
-  OTHER: 'Ostalo',
+  HEADACHE: 'Headache',
+  WEAKNESS: 'Weakness',
+  NUMBNESS: 'Numbness',
+  SPEECH_DIFFICULTY: 'Speech difficulty',
+  VISION_CHANGE: 'Vision change',
+  SEIZURE: 'Seizure',
+  DIZZINESS: 'Dizziness',
+  CONFUSION: 'Confusion',
+  BALANCE_LOSS: 'Balance loss',
+  OTHER: 'Other',
 };
 
 export const SYMPTOM_ICONS: Record<SymptomType, string> = {

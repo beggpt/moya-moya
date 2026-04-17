@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { formatDistanceToNow, format } from 'date-fns';
-import { hr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import {
   Plus, MessageSquare, Pin, Heart, Send, Loader2,
   Pill, Activity, Users, ChevronRight, X
@@ -47,9 +47,9 @@ interface PostComment {
 // ── Constants ──
 
 const CATEGORY_LABELS: Record<ForumCategory, string> = {
-  GENERAL: 'Općenito', SYMPTOMS: 'Simptomi', TREATMENT: 'Liječenje',
-  SURGERY: 'Operacija', LIFESTYLE: 'Životni stil', MENTAL_HEALTH: 'Mentalno zdravlje',
-  CAREGIVERS: 'Skrbnici', RESEARCH: 'Istraživanje',
+  GENERAL: 'General', SYMPTOMS: 'Symptoms', TREATMENT: 'Treatment',
+  SURGERY: 'Surgery', LIFESTYLE: 'Lifestyle', MENTAL_HEALTH: 'Mental health',
+  CAREGIVERS: 'Caregivers', RESEARCH: 'Research',
 };
 
 const CATEGORY_COLORS: Record<ForumCategory, string> = {
@@ -60,15 +60,15 @@ const CATEGORY_COLORS: Record<ForumCategory, string> = {
 };
 
 const CATEGORY_TABS: { label: string; value: ForumCategory | '' }[] = [
-  { label: 'Sve', value: '' },
-  { label: 'Općenito', value: 'GENERAL' },
-  { label: 'Simptomi', value: 'SYMPTOMS' },
-  { label: 'Liječenje', value: 'TREATMENT' },
-  { label: 'Operacija', value: 'SURGERY' },
-  { label: 'Životni stil', value: 'LIFESTYLE' },
-  { label: 'Mentalno', value: 'MENTAL_HEALTH' },
-  { label: 'Skrbnici', value: 'CAREGIVERS' },
-  { label: 'Istraživanje', value: 'RESEARCH' },
+  { label: 'All', value: '' },
+  { label: 'General', value: 'GENERAL' },
+  { label: 'Symptoms', value: 'SYMPTOMS' },
+  { label: 'Treatment', value: 'TREATMENT' },
+  { label: 'Surgery', value: 'SURGERY' },
+  { label: 'Lifestyle', value: 'LIFESTYLE' },
+  { label: 'Mental', value: 'MENTAL_HEALTH' },
+  { label: 'Caregivers', value: 'CAREGIVERS' },
+  { label: 'Research', value: 'RESEARCH' },
 ];
 
 const AVATAR_COLORS = [
@@ -126,7 +126,7 @@ function CommentsSection({ postId }: { postId: string }) {
         </div>
       ))}
       <div className="flex items-center gap-2">
-        <input className="input flex-1 text-sm" placeholder="Napiši komentar..." value={text}
+        <input className="input flex-1 text-sm" placeholder="Write a comment..." value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } }}
         />
@@ -146,7 +146,7 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: string) => void }
         <Avatar user={post.user} />
         <div className="flex-1 min-w-0">
           <Link href={`/user/${post.user.id}`} className="text-sm font-semibold text-neutral-800 hover:text-primary-600">{post.user.name}</Link>
-          <p className="text-xs text-neutral-500">{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: hr })}</p>
+          <p className="text-xs text-neutral-500">{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: enUS })}</p>
         </div>
       </div>
       <p className="text-neutral-700 text-sm leading-relaxed whitespace-pre-wrap mb-4">{post.content}</p>
@@ -190,18 +190,18 @@ function RightSidebar() {
     <aside className="space-y-4">
       {/* My health card */}
       <div className="card">
-        <h3 className="text-sm font-bold text-neutral-800 mb-3">Moje zdravlje</h3>
+        <h3 className="text-sm font-bold text-neutral-800 mb-3">My health</h3>
         <div className="space-y-3">
           <Link href="/medications" className="flex items-center justify-between text-sm hover:bg-neutral-50 -mx-2 px-2 py-1 rounded-lg">
-            <span className="flex items-center gap-2 text-neutral-600"><Pill size={16} /> Lijekovi</span>
+            <span className="flex items-center gap-2 text-neutral-600"><Pill size={16} /> Medications</span>
             <span className="badge bg-primary-50 text-primary-700">{meds.length}</span>
           </Link>
           <Link href="/symptoms" className="flex items-center justify-between text-sm hover:bg-neutral-50 -mx-2 px-2 py-1 rounded-lg">
-            <span className="flex items-center gap-2 text-neutral-600"><Activity size={16} /> Simptomi</span>
+            <span className="flex items-center gap-2 text-neutral-600"><Activity size={16} /> Symptoms</span>
             <span className="badge">{symptomsCount}</span>
           </Link>
           <Link href="/friends" className="flex items-center justify-between text-sm hover:bg-neutral-50 -mx-2 px-2 py-1 rounded-lg">
-            <span className="flex items-center gap-2 text-neutral-600"><Users size={16} /> Prijatelji</span>
+            <span className="flex items-center gap-2 text-neutral-600"><Users size={16} /> Friends</span>
             <span className="badge">{friends.length}</span>
           </Link>
         </div>
@@ -210,7 +210,7 @@ function RightSidebar() {
       {/* Today's meds */}
       {meds.length > 0 && (
         <div className="card">
-          <h3 className="text-sm font-bold text-neutral-800 mb-3">Današnji lijekovi</h3>
+          <h3 className="text-sm font-bold text-neutral-800 mb-3">Today's medications</h3>
           <div className="space-y-2">
             {meds.slice(0, 5).map((med) => (
               <div key={med.id} className="flex items-center justify-between">
@@ -219,17 +219,17 @@ function RightSidebar() {
                   <p className="text-xs text-neutral-500">{med.dosage}{med.unit} · {med.frequency}</p>
                 </div>
                 {med._takenToday ? (
-                  <span className="text-xs text-green-600 font-medium">Uzeto ✓</span>
+                  <span className="text-xs text-green-600 font-medium">Taken ✓</span>
                 ) : (
                   <button onClick={() => markTaken(med.id)} className="text-xs text-primary-600 font-medium hover:text-primary-700">
-                    Uzeto ✓
+                    Take ✓
                   </button>
                 )}
               </div>
             ))}
             {meds.length > 5 && (
               <Link href="/medications" className="text-xs text-primary-600 flex items-center gap-1">
-                Vidi sve <ChevronRight size={12} />
+                See all <ChevronRight size={12} />
               </Link>
             )}
           </div>
@@ -239,7 +239,7 @@ function RightSidebar() {
       {/* Friends preview */}
       {friends.length > 0 && (
         <div className="card">
-          <h3 className="text-sm font-bold text-neutral-800 mb-3">Prijatelji</h3>
+          <h3 className="text-sm font-bold text-neutral-800 mb-3">Friends</h3>
           <div className="space-y-2">
             {friends.slice(0, 4).map((f: any) => (
               <Link key={f.id} href={`/user/${f.id}`} className="flex items-center gap-2 hover:bg-neutral-50 -mx-2 px-2 py-1 rounded-lg">
@@ -249,7 +249,7 @@ function RightSidebar() {
             ))}
             {friends.length > 4 && (
               <Link href="/friends" className="text-xs text-primary-600 flex items-center gap-1">
-                Svi prijatelji <ChevronRight size={12} />
+                All friends <ChevronRight size={12} />
               </Link>
             )}
           </div>
@@ -358,14 +358,14 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold text-neutral-900">
-                {user?.name ? `Bok, ${user.name.split(' ')[0]}!` : 'Početna'}
+                {user?.name ? `Hi, ${user.name.split(' ')[0]}!` : 'Home'}
               </h1>
               <p className="text-neutral-500 text-sm">
-                {format(new Date(), 'EEEE, d. MMMM yyyy.', { locale: hr })}
+                {format(new Date(), 'EEEE, MMMM d, yyyy', { locale: enUS })}
               </p>
             </div>
             <button onClick={() => setShowTopicModal(true)} className="btn-primary">
-              <Plus className="w-5 h-5 mr-2" /> Nova tema
+              <Plus className="w-5 h-5 mr-2" /> New topic
             </button>
           </div>
 
@@ -385,7 +385,7 @@ export default function DashboardPage() {
                 tab === 'objave' ? 'border-primary-500 text-primary-700' : 'border-transparent text-neutral-500 hover:text-neutral-700'
               }`}
             >
-              Objave
+              Posts
             </button>
           </div>
 
@@ -412,9 +412,9 @@ export default function DashboardPage() {
                 ) : topics.length === 0 ? (
                   <div className="card text-center py-12">
                     <MessageSquare className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
-                    <p className="text-neutral-500 mb-4">Nema tema u ovoj kategoriji</p>
+                    <p className="text-neutral-500 mb-4">No topics in this category</p>
                     <button onClick={() => setShowTopicModal(true)} className="btn-primary">
-                      <Plus className="w-5 h-5 mr-2" /> Započni prvu temu
+                      <Plus className="w-5 h-5 mr-2" /> Start the first topic
                     </button>
                   </div>
                 ) : (
@@ -435,7 +435,7 @@ export default function DashboardPage() {
                           <Link href={`/user/${topic.user.id}`} onClick={(e) => e.stopPropagation()}
                             className="hover:text-primary-600 font-medium">{topic.user.name}</Link>
                           <span>·</span>
-                          <span>{formatDistanceToNow(new Date(topic.createdAt), { addSuffix: true, locale: hr })}</span>
+                          <span>{formatDistanceToNow(new Date(topic.createdAt), { addSuffix: true, locale: enUS })}</span>
                           <span className={`badge text-xs ${CATEGORY_COLORS[topic.category]}`}>
                             {CATEGORY_LABELS[topic.category]}
                           </span>
@@ -454,13 +454,13 @@ export default function DashboardPage() {
               {topicsTotalPages > 1 && (
                 <div className="flex justify-center items-center gap-2 mt-6">
                   <button onClick={() => setTopicsPage((p) => Math.max(1, p - 1))} disabled={topicsPage === 1} className="btn-ghost text-sm">
-                    Prethodna
+                    Previous
                   </button>
                   <span className="px-3 py-1 text-sm text-neutral-600">
                     {topicsPage} / {topicsTotalPages}
                   </span>
                   <button onClick={() => setTopicsPage((p) => Math.min(topicsTotalPages, p + 1))} disabled={topicsPage >= topicsTotalPages} className="btn-ghost text-sm">
-                    Sljedeća
+                    Next
                   </button>
                 </div>
               )}
@@ -475,13 +475,13 @@ export default function DashboardPage() {
                 <div className="flex items-start gap-3">
                   {user && <Avatar user={{ name: user.name || '', image: (user as any).image }} />}
                   <div className="flex-1">
-                    <textarea className="input w-full resize-none text-sm" rows={3} placeholder="Što ima novog?"
+                    <textarea className="input w-full resize-none text-sm" rows={3} placeholder="What's new?"
                       value={newPostContent} onChange={(e) => setNewPostContent(e.target.value)}
                     />
                     <div className="flex justify-end mt-2">
                       <button onClick={handlePublishPost} disabled={!newPostContent.trim() || publishing}
                         className="btn-primary px-5 py-2 text-sm font-semibold disabled:opacity-40">
-                        {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Objavi'}
+                        {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Publish'}
                       </button>
                     </div>
                   </div>
@@ -492,7 +492,7 @@ export default function DashboardPage() {
                 <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary-500" /></div>
               ) : posts.length === 0 ? (
                 <div className="card text-center py-12">
-                  <p className="text-neutral-500 text-sm">Još nema objava. Budi prvi!</p>
+                  <p className="text-neutral-500 text-sm">No posts yet. Be the first!</p>
                 </div>
               ) : (
                 posts.map((post) => <PostCard key={post.id} post={post} onLike={handleLike} />)
@@ -502,7 +502,7 @@ export default function DashboardPage() {
                 <div className="flex justify-center pt-2 pb-6">
                   <button onClick={() => setPostsPage((p) => p + 1)} disabled={postsLoading}
                     className="btn-secondary px-6 py-2 text-sm font-medium">
-                    {postsLoading ? <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Učitavam...</span> : 'Učitaj više'}
+                    {postsLoading ? <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Loading...</span> : 'Load more'}
                   </button>
                 </div>
               )}
@@ -521,18 +521,18 @@ export default function DashboardPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-neutral-900">Nova tema</h2>
+              <h2 className="text-xl font-bold text-neutral-900">New topic</h2>
               <button onClick={() => setShowTopicModal(false)} className="p-2 hover:bg-neutral-100 rounded-lg">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleCreateTopic} className="space-y-5">
               <div>
-                <label className="label">Naslov</label>
-                <input type="text" value={topicTitle} onChange={(e) => setTopicTitle(e.target.value)} className="input" placeholder="Naslov teme..." required />
+                <label className="label">Title</label>
+                <input type="text" value={topicTitle} onChange={(e) => setTopicTitle(e.target.value)} className="input" placeholder="Topic title..." required />
               </div>
               <div>
-                <label className="label">Kategorija</label>
+                <label className="label">Category</label>
                 <select value={topicCategory} onChange={(e) => setTopicCategory(e.target.value as ForumCategory)} className="input">
                   {Object.entries(CATEGORY_LABELS).map(([val, label]) => (
                     <option key={val} value={val}>{label}</option>
@@ -540,11 +540,11 @@ export default function DashboardPage() {
                 </select>
               </div>
               <div>
-                <label className="label">Sadržaj</label>
-                <textarea value={topicContent} onChange={(e) => setTopicContent(e.target.value)} className="input min-h-[140px]" rows={5} placeholder="Napiši svoju temu..." required />
+                <label className="label">Content</label>
+                <textarea value={topicContent} onChange={(e) => setTopicContent(e.target.value)} className="input min-h-[140px]" rows={5} placeholder="Write your topic..." required />
               </div>
               <button type="submit" disabled={topicSaving} className="btn-primary w-full">
-                {topicSaving ? 'Objavljivanje...' : 'Objavi temu'}
+                {topicSaving ? 'Publishing...' : 'Publish topic'}
               </button>
             </form>
           </div>

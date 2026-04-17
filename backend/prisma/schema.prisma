@@ -49,6 +49,7 @@ model User {
   forumTopics      ForumTopic[]
   sentRequests     Friendship[] @relation("requester")
   receivedRequests Friendship[] @relation("receiver")
+  topicSubscriptions TopicSubscription[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -374,6 +375,11 @@ enum NotificationType {
   WEEKLY_SUMMARY
   EDUCATIONAL
   SYSTEM
+  FRIEND_REQUEST
+  FRIEND_ACCEPTED
+  TOPIC_REPLY
+  POST_COMMENT
+  POST_LIKE
 }
 
 model Notification {
@@ -501,12 +507,44 @@ model ForumTopic {
   pinned    Boolean       @default(false)
   locked    Boolean       @default(false)
   comments  Comment[]
+  subscriptions TopicSubscription[]
 
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
   @@index([category, createdAt])
   @@index([createdAt])
+}
+
+model TopicSubscription {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topicId   String
+  topic     ForumTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+
+  @@unique([userId, topicId])
+  @@index([topicId])
+}
+
+// ============================================
+// NEWS (scraped from PubMed)
+// ============================================
+
+model News {
+  id          String   @id @default(cuid())
+  externalId  String?  @unique
+  title       String
+  summary     String?
+  source      String
+  url         String
+  publishedAt DateTime
+  tags        String[]
+
+  createdAt   DateTime @default(now())
+
+  @@index([publishedAt])
 }
 
 // ============================================

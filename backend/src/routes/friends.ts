@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { prisma } from '../utils/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { createNotification } from '../services/notifications';
 
 const router = Router();
 router.use(authMiddleware);
@@ -129,10 +130,21 @@ router.post('/request', async (req: AuthRequest, res) => {
     const friendship = await prisma.friendship.create({
       data: { requesterId: req.user!.id, receiverId: userId },
     });
+
+    // Notify receiver
+    const requester = await prisma.user.findUnique({ where: { id: req.user!.id }, select: { name: true } });
+    await createNotification({
+      userId,
+      type: 'FRIEND_REQUEST',
+      title: 'New friend request',
+      body: `${requester?.name || 'Someone'} wants to be your friend`,
+      data: { friendshipId: friendship.id, requesterId: req.user!.id },
+    });
+
     res.json(friendship);
   } catch (error) {
     console.error('Friend request error:', error);
-    res.status(500).json({ error: 'Greška' });
+    res.status(500).json({ error: 'Error' });
   }
 });
 
@@ -147,10 +159,21 @@ router.post('/:id/accept', async (req: AuthRequest, res) => {
       where: { id: req.params.id },
       data: { accepted: true },
     });
+
+    // Notify requester
+    const receiver = await prisma.user.findUnique({ where: { id: req.user!.id }, select: { name: true } });
+    await createNotification({
+      userId: friendship.requesterId,
+      type: 'FRIEND_ACCEPTED',
+      title: 'Friend request accepted',
+      body: `${receiver?.name || 'Someone'} accepted your friend request`,
+      data: { userId: req.user!.id },
+    });
+
     res.json(updated);
   } catch (error) {
     console.error('Accept friend error:', error);
-    res.status(500).json({ error: 'Greška' });
+    res.status(500).json({ error: 'Error' });
   }
 });
 

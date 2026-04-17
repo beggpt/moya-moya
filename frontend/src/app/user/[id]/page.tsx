@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { format, formatDistanceToNow } from 'date-fns';
-import { hr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import {
   ArrowLeft, UserPlus, UserCheck, UserX, Clock, Pill,
   Heart, MessageSquare, Loader2, Shield, Stethoscope,
@@ -24,7 +24,7 @@ function pickColor(name: string) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-const SIDE_LABELS: Record<string, string> = { LEFT: 'Lijeva', RIGHT: 'Desna', BILATERAL: 'Obostrana' };
+const SIDE_LABELS: Record<string, string> = { LEFT: 'Left', RIGHT: 'Right', BILATERAL: 'Bilateral' };
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -90,10 +90,10 @@ export default function UserProfilePage() {
     return (
       <div className="max-w-3xl">
         <button onClick={() => router.back()} className="btn-ghost mb-6">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Natrag
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <div className="card text-center py-12">
-          <p className="text-neutral-500">Korisnik nije pronađen</p>
+          <p className="text-neutral-500">User not found</p>
         </div>
       </div>
     );
@@ -105,7 +105,7 @@ export default function UserProfilePage() {
   return (
     <div className="max-w-4xl">
       <button onClick={() => router.back()} className="btn-ghost mb-6">
-        <ArrowLeft className="w-4 h-4 mr-2" /> Natrag
+        <ArrowLeft className="w-4 h-4 mr-2" /> Back
       </button>
 
       {/* Profile Header */}
@@ -123,15 +123,15 @@ export default function UserProfilePage() {
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-neutral-900">{profile.name}</h1>
             <p className="text-sm text-neutral-500 mt-1">
-              Član od {format(new Date(profile.createdAt), 'MMMM yyyy.', { locale: hr })}
+              Member since {format(new Date(profile.createdAt), 'MMMM yyyy', { locale: enUS })}
             </p>
 
             {/* Stats */}
             <div className="flex items-center gap-4 mt-3 text-sm text-neutral-600">
-              <span className="flex items-center gap-1"><MessageSquare size={14} /> {profile._count?.posts || 0} objava</span>
-              <span className="flex items-center gap-1"><MessageSquare size={14} /> {profile._count?.forumTopics || 0} tema</span>
+              <span className="flex items-center gap-1"><MessageSquare size={14} /> {profile._count?.posts || 0} posts</span>
+              <span className="flex items-center gap-1"><MessageSquare size={14} /> {profile._count?.forumTopics || 0} topics</span>
               {profile.mutualFriends > 0 && !isMe && (
-                <span className="flex items-center gap-1"><Users size={14} /> {profile.mutualFriends} zajedničkih prijatelja</span>
+                <span className="flex items-center gap-1"><Users size={14} /> {profile.mutualFriends} mutual friends</span>
               )}
             </div>
 
@@ -140,31 +140,31 @@ export default function UserProfilePage() {
               <div className="mt-4">
                 {profile.friendshipStatus === 'none' && (
                   <button onClick={sendRequest} disabled={actionLoading} className="btn-primary text-sm">
-                    <UserPlus className="w-4 h-4 mr-2" /> Dodaj prijatelja
+                    <UserPlus className="w-4 h-4 mr-2" /> Add friend
                   </button>
                 )}
                 {profile.friendshipStatus === 'pending_sent' && (
                   <button disabled className="btn-secondary text-sm opacity-70">
-                    <Clock className="w-4 h-4 mr-2" /> Zahtjev poslan
+                    <Clock className="w-4 h-4 mr-2" /> Request sent
                   </button>
                 )}
                 {profile.friendshipStatus === 'pending_received' && (
                   <div className="flex gap-2">
                     <button onClick={acceptRequest} disabled={actionLoading} className="btn-primary text-sm">
-                      <UserCheck className="w-4 h-4 mr-2" /> Prihvati
+                      <UserCheck className="w-4 h-4 mr-2" /> Accept
                     </button>
                     <button onClick={removeFriend} disabled={actionLoading} className="btn-ghost text-sm text-danger">
-                      <UserX className="w-4 h-4 mr-2" /> Odbij
+                      <UserX className="w-4 h-4 mr-2" /> Decline
                     </button>
                   </div>
                 )}
                 {profile.friendshipStatus === 'friends' && (
                   <div className="flex items-center gap-3">
                     <span className="badge bg-green-100 text-green-700 flex items-center gap-1">
-                      <UserCheck size={14} /> Prijatelji
+                      <UserCheck size={14} /> Friends
                     </span>
                     <button onClick={removeFriend} disabled={actionLoading} className="btn-ghost text-xs text-neutral-400 hover:text-danger">
-                      Ukloni
+                      Remove
                     </button>
                   </div>
                 )}
@@ -181,38 +181,38 @@ export default function UserProfilePage() {
           {p && (
             <div className="card">
               <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                <Stethoscope size={20} className="text-primary-500" /> Dijagnoza
+                <Stethoscope size={20} className="text-primary-500" /> Diagnosis
               </h2>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-neutral-500">Tip</span>
+                  <span className="text-sm text-neutral-500">Type</span>
                   <span className="text-sm font-medium text-neutral-800">
-                    {p.moyamoyaType === 'DISEASE' ? 'Moyamoya bolest' : p.moyamoyaType === 'SYNDROME' ? 'Moyamoya sindrom' : '-'}
+                    {p.moyamoyaType === 'DISEASE' ? 'Moyamoya disease' : p.moyamoyaType === 'SYNDROME' ? 'Moyamoya syndrome' : '-'}
                   </span>
                 </div>
                 {p.suzukiStage && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-neutral-500">Suzuki stadij</span>
-                    <span className="text-sm font-medium text-neutral-800">Stadij {p.suzukiStage}</span>
+                    <span className="text-sm text-neutral-500">Suzuki stage</span>
+                    <span className="text-sm font-medium text-neutral-800">Stage {p.suzukiStage}</span>
                   </div>
                 )}
                 {p.affectedSide && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-neutral-500">Zahvaćena strana</span>
+                    <span className="text-sm text-neutral-500">Affected side</span>
                     <span className="text-sm font-medium text-neutral-800">{SIDE_LABELS[p.affectedSide] || p.affectedSide}</span>
                   </div>
                 )}
                 {p.diagnosisDate && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-neutral-500">Datum dijagnoze</span>
+                    <span className="text-sm text-neutral-500">Date of diagnosis</span>
                     <span className="text-sm font-medium text-neutral-800">
-                      {format(new Date(p.diagnosisDate), 'd.M.yyyy.')}
+                      {format(new Date(p.diagnosisDate), 'MMMM d, yyyy')}
                     </span>
                   </div>
                 )}
                 {p.allergies && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-neutral-500">Alergije</span>
+                    <span className="text-sm text-neutral-500">Allergies</span>
                     <span className="text-sm font-medium text-neutral-800">{p.allergies}</span>
                   </div>
                 )}
@@ -224,12 +224,12 @@ export default function UserProfilePage() {
           {p?.hadSurgery && (
             <div className="card">
               <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                <Shield size={20} className="text-purple-500" /> Operacija
+                <Shield size={20} className="text-purple-500" /> Surgery
               </h2>
               <div className="space-y-3">
                 {p.surgeryType && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-neutral-500">Tip operacije</span>
+                    <span className="text-sm text-neutral-500">Surgery type</span>
                     <span className="text-sm font-medium text-neutral-800">{p.surgeryType}</span>
                   </div>
                 )}
@@ -237,32 +237,32 @@ export default function UserProfilePage() {
                   <>
                     {p.surgeryDateLeft && (
                       <div className="flex justify-between">
-                        <span className="text-sm text-neutral-500">Lijeva strana</span>
-                        <span className="text-sm font-medium text-neutral-800">{format(new Date(p.surgeryDateLeft), 'd.M.yyyy.')}</span>
+                        <span className="text-sm text-neutral-500">Left side</span>
+                        <span className="text-sm font-medium text-neutral-800">{format(new Date(p.surgeryDateLeft), 'MMMM d, yyyy')}</span>
                       </div>
                     )}
                     {p.surgeryDateRight && (
                       <div className="flex justify-between">
-                        <span className="text-sm text-neutral-500">Desna strana</span>
-                        <span className="text-sm font-medium text-neutral-800">{format(new Date(p.surgeryDateRight), 'd.M.yyyy.')}</span>
+                        <span className="text-sm text-neutral-500">Right side</span>
+                        <span className="text-sm font-medium text-neutral-800">{format(new Date(p.surgeryDateRight), 'MMMM d, yyyy')}</span>
                       </div>
                     )}
                   </>
                 ) : p.surgeryDate && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-neutral-500">Datum operacije</span>
-                    <span className="text-sm font-medium text-neutral-800">{format(new Date(p.surgeryDate), 'd.M.yyyy.')}</span>
+                    <span className="text-sm text-neutral-500">Surgery date</span>
+                    <span className="text-sm font-medium text-neutral-800">{format(new Date(p.surgeryDate), 'MMMM d, yyyy')}</span>
                   </div>
                 )}
                 {p.hospitalName && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-neutral-500">Bolnica</span>
+                    <span className="text-sm text-neutral-500">Hospital</span>
                     <span className="text-sm font-medium text-neutral-800">{p.hospitalName}</span>
                   </div>
                 )}
                 {p.neurologistName && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-neutral-500">Neurolog</span>
+                    <span className="text-sm text-neutral-500">Neurologist</span>
                     <span className="text-sm font-medium text-neutral-800">{p.neurologistName}</span>
                   </div>
                 )}
@@ -273,9 +273,9 @@ export default function UserProfilePage() {
           {!p?.hadSurgery && p && (
             <div className="card">
               <h2 className="text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
-                <Shield size={20} className="text-purple-500" /> Operacija
+                <Shield size={20} className="text-purple-500" /> Surgery
               </h2>
-              <p className="text-sm text-neutral-500">Nije imao/la operaciju</p>
+              <p className="text-sm text-neutral-500">Has not had surgery</p>
             </div>
           )}
         </div>
@@ -286,7 +286,7 @@ export default function UserProfilePage() {
           {profile.medications && profile.medications.length > 0 && (
             <div className="card">
               <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                <Pill size={20} className="text-blue-500" /> Lijekovi ({profile.medications.length})
+                <Pill size={20} className="text-blue-500" /> Medications ({profile.medications.length})
               </h2>
               <div className="space-y-3">
                 {profile.medications.map((med: any) => (
@@ -313,14 +313,14 @@ export default function UserProfilePage() {
           {profile.posts && profile.posts.length > 0 && (
             <div className="card">
               <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                <MessageSquare size={20} className="text-teal-500" /> Nedavne objave
+                <MessageSquare size={20} className="text-teal-500" /> Recent posts
               </h2>
               <div className="space-y-3">
                 {profile.posts.map((post: any) => (
                   <div key={post.id} className="bg-neutral-50 rounded-xl p-3">
                     <p className="text-sm text-neutral-700 line-clamp-3 whitespace-pre-wrap">{post.content}</p>
                     <div className="flex items-center gap-3 mt-2 text-xs text-neutral-500">
-                      <span>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: hr })}</span>
+                      <span>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: enUS })}</span>
                       <span className="flex items-center gap-1"><Heart size={12} /> {post._count?.likes || 0}</span>
                       <span className="flex items-center gap-1"><MessageSquare size={12} /> {post._count?.comments || 0}</span>
                     </div>
@@ -333,7 +333,7 @@ export default function UserProfilePage() {
           {/* Empty state */}
           {(!profile.medications || profile.medications.length === 0) && (!profile.posts || profile.posts.length === 0) && (
             <div className="card text-center py-8">
-              <p className="text-neutral-400 text-sm">Korisnik još nema javnih informacija.</p>
+              <p className="text-neutral-400 text-sm">This user has no public information yet.</p>
             </div>
           )}
         </div>

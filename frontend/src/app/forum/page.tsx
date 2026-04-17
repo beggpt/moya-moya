@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
-import { hr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { Plus, MessageSquare, Pin, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
@@ -30,26 +30,26 @@ interface Topic {
 }
 
 const CATEGORY_TABS: { label: string; value: ForumCategory | '' }[] = [
-  { label: 'Sve', value: '' },
-  { label: 'Opcenito', value: 'GENERAL' },
-  { label: 'Simptomi', value: 'SYMPTOMS' },
-  { label: 'Lijecenje', value: 'TREATMENT' },
-  { label: 'Operacija', value: 'SURGERY' },
-  { label: 'Zivotni stil', value: 'LIFESTYLE' },
-  { label: 'Mentalno zdravlje', value: 'MENTAL_HEALTH' },
-  { label: 'Skrbnici', value: 'CAREGIVERS' },
-  { label: 'Istrazivanje', value: 'RESEARCH' },
+  { label: 'All', value: '' },
+  { label: 'General', value: 'GENERAL' },
+  { label: 'Symptoms', value: 'SYMPTOMS' },
+  { label: 'Treatment', value: 'TREATMENT' },
+  { label: 'Surgery', value: 'SURGERY' },
+  { label: 'Lifestyle', value: 'LIFESTYLE' },
+  { label: 'Mental health', value: 'MENTAL_HEALTH' },
+  { label: 'Caregivers', value: 'CAREGIVERS' },
+  { label: 'Research', value: 'RESEARCH' },
 ];
 
 const CATEGORY_LABELS: Record<ForumCategory, string> = {
-  GENERAL: 'Opcenito',
-  SYMPTOMS: 'Simptomi',
-  TREATMENT: 'Lijecenje',
-  SURGERY: 'Operacija',
-  LIFESTYLE: 'Zivotni stil',
-  MENTAL_HEALTH: 'Mentalno zdravlje',
-  CAREGIVERS: 'Skrbnici',
-  RESEARCH: 'Istrazivanje',
+  GENERAL: 'General',
+  SYMPTOMS: 'Symptoms',
+  TREATMENT: 'Treatment',
+  SURGERY: 'Surgery',
+  LIFESTYLE: 'Lifestyle',
+  MENTAL_HEALTH: 'Mental health',
+  CAREGIVERS: 'Caregivers',
+  RESEARCH: 'Research',
 };
 
 const CATEGORY_COLORS: Record<ForumCategory, string> = {
@@ -93,7 +93,7 @@ export default function ForumPage() {
       setTopics(data.topics);
       setTotal(data.total);
     } catch (error) {
-      console.error('Greska pri ucitavanju tema:', error);
+      console.error('Error loading topics:', error);
     } finally {
       setLoading(false);
     }
@@ -116,7 +116,7 @@ export default function ForumPage() {
       setPage(1);
       loadTopics();
     } catch (error) {
-      console.error('Greska pri kreiranju teme:', error);
+      console.error('Error creating topic:', error);
     } finally {
       setSaving(false);
     }
@@ -129,13 +129,13 @@ export default function ForumPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Forum zajednice</h1>
+          <h1 className="text-2xl font-bold text-neutral-900">Community forum</h1>
           <p className="text-neutral-500">
-            {total} {total === 1 ? 'tema' : 'tema'}
+            {total} {total === 1 ? 'topic' : 'topics'}
           </p>
         </div>
         <button onClick={() => setShowModal(true)} className="btn-primary">
-          <Plus className="w-5 h-5 mr-2" /> Nova tema
+          <Plus className="w-5 h-5 mr-2" /> New topic
         </button>
       </div>
 
@@ -163,14 +163,14 @@ export default function ForumPage() {
       <div className="space-y-3">
         {loading ? (
           <div className="card text-center py-12">
-            <p className="text-neutral-500">Ucitavanje...</p>
+            <p className="text-neutral-500">Loading...</p>
           </div>
         ) : topics.length === 0 ? (
           <div className="card text-center py-12">
             <MessageSquare className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
-            <p className="text-neutral-500 mb-4">Nema tema u ovoj kategoriji</p>
+            <p className="text-neutral-500 mb-4">No topics in this category</p>
             <button onClick={() => setShowModal(true)} className="btn-primary">
-              <Plus className="w-5 h-5 mr-2" /> Zapocni prvu temu
+              <Plus className="w-5 h-5 mr-2" /> Start the first topic
             </button>
           </div>
         ) : (
@@ -209,7 +209,7 @@ export default function ForumPage() {
                   <span>
                     {formatDistanceToNow(new Date(topic.createdAt), {
                       addSuffix: true,
-                      locale: hr,
+                      locale: enUS,
                     })}
                   </span>
                   <span
@@ -238,17 +238,17 @@ export default function ForumPage() {
             disabled={page === 1}
             className="btn-ghost"
           >
-            <ChevronLeft className="w-4 h-4 mr-1" /> Prethodna
+            <ChevronLeft className="w-4 h-4 mr-1" /> Previous
           </button>
           <span className="px-4 py-2 text-sm text-neutral-600">
-            Stranica {page} od {totalPages}
+            Page {page} of {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
             className="btn-ghost"
           >
-            Sljedeca <ChevronRight className="w-4 h-4 ml-1" />
+            Next <ChevronRight className="w-4 h-4 ml-1" />
           </button>
         </div>
       )}
@@ -258,7 +258,7 @@ export default function ForumPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-neutral-900">Nova tema</h2>
+              <h2 className="text-xl font-bold text-neutral-900">New topic</h2>
               <button
                 onClick={() => setShowModal(false)}
                 className="p-2 hover:bg-neutral-100 rounded-lg"
@@ -270,7 +270,7 @@ export default function ForumPage() {
             <form onSubmit={handleCreateTopic} className="space-y-5">
               <div>
                 <label htmlFor="topic-title" className="label">
-                  Naslov
+                  Title
                 </label>
                 <input
                   id="topic-title"
@@ -278,14 +278,14 @@ export default function ForumPage() {
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
                   className="input"
-                  placeholder="Naslov teme..."
+                  placeholder="Topic title..."
                   required
                 />
               </div>
 
               <div>
                 <label htmlFor="topic-category" className="label">
-                  Kategorija
+                  Category
                 </label>
                 <select
                   id="topic-category"
@@ -303,7 +303,7 @@ export default function ForumPage() {
 
               <div>
                 <label htmlFor="topic-content" className="label">
-                  Sadrzaj
+                  Content
                 </label>
                 <textarea
                   id="topic-content"
@@ -311,13 +311,13 @@ export default function ForumPage() {
                   onChange={(e) => setFormContent(e.target.value)}
                   className="input min-h-[140px]"
                   rows={5}
-                  placeholder="Napisi svoju temu..."
+                  placeholder="Write your topic..."
                   required
                 />
               </div>
 
               <button type="submit" disabled={saving} className="btn-primary w-full">
-                {saving ? 'Objavljivanje...' : 'Objavi temu'}
+                {saving ? 'Publishing...' : 'Publish topic'}
               </button>
             </form>
           </div>

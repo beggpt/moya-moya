@@ -3,43 +3,72 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
+import { api } from '@/lib/api';
 import {
   LayoutDashboard, Activity, Pill, Heart, Brain, Calendar,
-  FileText, Shield, Dumbbell, User, LogOut, Users, BarChart3,
+  Shield, Dumbbell, User, LogOut, Users, BarChart3,
   BookOpen, ChevronLeft, ChevronRight, UtensilsCrossed,
-  MessageCircle, UserPlus, Home
+  MessageCircle, UserPlus, Home, Bell, Newspaper
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 
 const patientLinks = [
-  { href: '/dashboard', label: 'Početna', icon: Home },
+  { href: '/dashboard', label: 'Home', icon: Home },
+  { href: '/news', label: 'News', icon: Newspaper },
+  { href: '/notifications', label: 'Notifications', icon: Bell, notifBell: true },
   { href: '/forum', label: 'Forum', icon: MessageCircle },
-  { href: '/friends', label: 'Prijatelji', icon: UserPlus },
-  { href: '/recipes', label: 'Recepti', icon: UtensilsCrossed },
-  { href: '/medications', label: 'Lijekovi', icon: Pill },
-  { href: '/symptoms', label: 'Simptomi', icon: Activity },
-  { href: '/blood-pressure', label: 'Krvni tlak', icon: Heart },
-  { href: '/cognitive', label: 'Kognitivni testovi', icon: Brain },
-  { href: '/appointments', label: 'Termini', icon: Calendar },
-  { href: '/exercise', label: 'Vježba', icon: Dumbbell },
-  { href: '/emergency', label: 'Hitna kartica', icon: Shield },
-  { href: '/profile', label: 'Profil', icon: User },
+  { href: '/friends', label: 'Friends', icon: UserPlus },
+  { href: '/recipes', label: 'Recipes', icon: UtensilsCrossed },
+  { href: '/medications', label: 'Medications', icon: Pill },
+  { href: '/symptoms', label: 'Symptoms', icon: Activity },
+  { href: '/blood-pressure', label: 'Blood Pressure', icon: Heart },
+  { href: '/cognitive', label: 'Cognitive Tests', icon: Brain },
+  { href: '/appointments', label: 'Appointments', icon: Calendar },
+  { href: '/exercise', label: 'Exercise', icon: Dumbbell },
+  { href: '/emergency', label: 'Emergency Card', icon: Shield },
+  { href: '/profile', label: 'Profile', icon: User },
 ];
 
 const adminLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/users', label: 'Korisnici', icon: Users },
-  { href: '/admin/reports', label: 'Analitika', icon: BarChart3 },
-  { href: '/admin/content', label: 'Sadržaj', icon: BookOpen },
+  { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/reports', label: 'Analytics', icon: BarChart3 },
+  { href: '/admin/content', label: 'Content', icon: BookOpen },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const links = user?.role === 'ADMIN' ? adminLinks : patientLinks;
+  const isPatient = user?.role !== 'ADMIN';
+  const links = isPatient ? patientLinks : adminLinks;
+
+  useEffect(() => {
+    if (!isPatient) return;
+    let cancelled = false;
+
+    const fetchCount = async () => {
+      try {
+        const res = await api.get('/notifications/unread-count');
+        if (!cancelled) {
+          const count = res.data?.count ?? res.data?.unreadCount ?? 0;
+          setUnreadCount(count);
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    fetchCount();
+    const id = setInterval(fetchCount, 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [isPatient]);
 
   const handleLogout = () => {
     logout();
@@ -64,7 +93,7 @@ export default function Sidebar() {
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-500"
-          aria-label={collapsed ? 'Proširi izbornik' : 'Smanji izbornik'}
+          aria-label={collapsed ? 'Expand menu' : 'Collapse menu'}
         >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
@@ -73,20 +102,36 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 p-3 overflow-y-auto">
         <ul className="space-y-1">
-          {links.map((link) => {
+          {links.map((link: any) => {
             const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
+            const showBadge = link.notifBell && unreadCount > 0;
             return (
               <li key={link.href}>
                 <Link
                   href={link.href}
                   className={clsx(
                     isActive ? 'nav-link-active' : 'nav-link',
-                    collapsed && 'justify-center px-2'
+                    collapsed && 'justify-center px-2',
+                    'relative'
                   )}
                   title={collapsed ? link.label : undefined}
                 >
-                  <link.icon size={20} className="shrink-0" />
-                  {!collapsed && <span>{link.label}</span>}
+                  <span className="relative shrink-0">
+                    <link.icon size={20} />
+                    {showBadge && collapsed && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 rounded-full w-2.5 h-2.5 border-2 border-white" />
+                    )}
+                  </span>
+                  {!collapsed && (
+                    <>
+                      <span className="flex-1">{link.label}</span>
+                      {showBadge && (
+                        <span className="bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </>
+                  )}
                 </Link>
               </li>
             );
@@ -105,10 +150,10 @@ export default function Sidebar() {
         <button
           onClick={handleLogout}
           className={clsx('nav-link text-neutral-500 hover:text-danger w-full', collapsed && 'justify-center px-2')}
-          title="Odjava"
+          title="Log out"
         >
           <LogOut size={20} className="shrink-0" />
-          {!collapsed && <span>Odjava</span>}
+          {!collapsed && <span>Log out</span>}
         </button>
       </div>
     </aside>
