@@ -21,6 +21,9 @@ import forumRoutes from './routes/forum';
 import friendRoutes from './routes/friends';
 import notificationRoutes from './routes/notifications';
 import newsRoutes from './routes/news';
+import messageRoutes from './routes/messages';
+import hydrationRoutes from './routes/hydration';
+import breathingRoutes from './routes/breathing';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -50,6 +53,9 @@ app.use('/api/forum', forumRoutes);
 app.use('/api/friends', friendRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/news', newsRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/hydration', hydrationRoutes);
+app.use('/api/breathing', breathingRoutes);
 
 // Educational content (public)
 app.get('/api/content', async (_req, res) => {

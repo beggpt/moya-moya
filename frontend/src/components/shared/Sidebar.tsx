@@ -8,7 +8,8 @@ import {
   LayoutDashboard, Activity, Pill, Heart, Brain, Calendar,
   Shield, Dumbbell, User, LogOut, Users, BarChart3,
   BookOpen, ChevronLeft, ChevronRight, UtensilsCrossed,
-  MessageCircle, UserPlus, Home, Bell, Newspaper
+  MessageCircle, UserPlus, Home, Bell, Newspaper, Mail,
+  Droplet, Wind
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
@@ -17,12 +18,15 @@ const patientLinks = [
   { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/news', label: 'News', icon: Newspaper },
   { href: '/notifications', label: 'Notifications', icon: Bell, notifBell: true },
+  { href: '/messages', label: 'Messages', icon: Mail, messagesBell: true },
   { href: '/forum', label: 'Forum', icon: MessageCircle },
   { href: '/friends', label: 'Friends', icon: UserPlus },
   { href: '/recipes', label: 'Recipes', icon: UtensilsCrossed },
   { href: '/medications', label: 'Medications', icon: Pill },
   { href: '/symptoms', label: 'Symptoms', icon: Activity },
   { href: '/blood-pressure', label: 'Blood Pressure', icon: Heart },
+  { href: '/hydration', label: 'Hydration', icon: Droplet },
+  { href: '/breathing', label: 'Breathing', icon: Wind },
   { href: '/cognitive', label: 'Cognitive Tests', icon: Brain },
   { href: '/appointments', label: 'Appointments', icon: Calendar },
   { href: '/exercise', label: 'Exercise', icon: Dumbbell },
@@ -42,6 +46,7 @@ export default function Sidebar() {
   const { user, logout } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   const isPatient = user?.role !== 'ADMIN';
   const links = isPatient ? patientLinks : adminLinks;
@@ -50,20 +55,22 @@ export default function Sidebar() {
     if (!isPatient) return;
     let cancelled = false;
 
-    const fetchCount = async () => {
+    const fetchCounts = async () => {
       try {
-        const res = await api.get('/notifications/unread-count');
-        if (!cancelled) {
-          const count = res.data?.count ?? res.data?.unreadCount ?? 0;
-          setUnreadCount(count);
-        }
+        const [notifRes, msgRes] = await Promise.all([
+          api.get('/notifications/unread-count').catch(() => null),
+          api.get('/messages/unread-count').catch(() => null),
+        ]);
+        if (cancelled) return;
+        setUnreadCount(notifRes?.data?.count ?? notifRes?.data?.unreadCount ?? 0);
+        setUnreadMessages(msgRes?.data?.count ?? 0);
       } catch {
         // ignore
       }
     };
 
-    fetchCount();
-    const id = setInterval(fetchCount, 30000);
+    fetchCounts();
+    const id = setInterval(fetchCounts, 30000);
     return () => {
       cancelled = true;
       clearInterval(id);
@@ -105,7 +112,8 @@ export default function Sidebar() {
         <ul className="space-y-1">
           {links.map((link: any) => {
             const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
-            const showBadge = link.notifBell && unreadCount > 0;
+            const badgeCount = link.notifBell ? unreadCount : link.messagesBell ? unreadMessages : 0;
+            const showBadge = badgeCount > 0;
             return (
               <li key={link.href}>
                 <Link
@@ -127,8 +135,8 @@ export default function Sidebar() {
                     <>
                       <span className="flex-1">{link.label}</span>
                       {showBadge && (
-                        <span className="bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                          {unreadCount}
+                        <span className="bg-red-500 text-white text-[10px] rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
+                          {badgeCount > 9 ? '9+' : badgeCount}
                         </span>
                       )}
                     </>

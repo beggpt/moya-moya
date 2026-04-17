@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Search, UserPlus, UserCheck, UserX, Users, MessageCircle, Trash2, Sparkles, MapPin } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 
 type Tab = 'friends' | 'requests' | 'suggested' | 'search';
@@ -90,6 +91,7 @@ function formatDate(dateStr: string) {
 }
 
 export default function FriendsPage() {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>('friends');
   const [friends, setFriends] = useState<Friend[]>([]);
   const [requests, setRequests] = useState<FriendRequest[]>([]);
@@ -264,7 +266,10 @@ export default function FriendsPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="btn-ghost text-sm flex items-center gap-1.5">
+                  <button
+                    onClick={() => router.push(`/messages?user=${friend.id}`)}
+                    className="btn-ghost text-sm flex items-center gap-1.5"
+                  >
                     <MessageCircle size={16} />
                     Message
                   </button>

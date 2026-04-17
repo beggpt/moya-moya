@@ -7,7 +7,8 @@ import clsx from 'clsx';
 import {
   Home, MessageCircle, UserPlus, Pill, Activity, Heart, Brain,
   Calendar, Dumbbell, Shield, User, Bell, Newspaper, UtensilsCrossed,
-  Menu, X, LogOut, LayoutDashboard, Users, BarChart3, BookOpen
+  Menu, X, LogOut, LayoutDashboard, Users, BarChart3, BookOpen,
+  Mail, Droplet, Wind
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { api } from '@/lib/api';
@@ -15,20 +16,23 @@ import { api } from '@/lib/api';
 const primary = [
   { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/forum', label: 'Forum', icon: MessageCircle },
+  { href: '/messages', label: 'Chat', icon: Mail, messagesBadge: true },
   { href: '/notifications', label: 'Alerts', icon: Bell, showBadge: true },
-  { href: '/friends', label: 'Friends', icon: UserPlus },
 ];
 
 const allLinks = [
   { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/news', label: 'News', icon: Newspaper },
   { href: '/notifications', label: 'Notifications', icon: Bell, showBadge: true },
+  { href: '/messages', label: 'Messages', icon: Mail, messagesBadge: true },
   { href: '/forum', label: 'Forum', icon: MessageCircle },
   { href: '/friends', label: 'Friends', icon: UserPlus },
   { href: '/recipes', label: 'Recipes', icon: UtensilsCrossed },
   { href: '/medications', label: 'Medications', icon: Pill },
   { href: '/symptoms', label: 'Symptoms', icon: Activity },
   { href: '/blood-pressure', label: 'Blood Pressure', icon: Heart },
+  { href: '/hydration', label: 'Hydration', icon: Droplet },
+  { href: '/breathing', label: 'Breathing', icon: Wind },
   { href: '/cognitive', label: 'Cognitive Tests', icon: Brain },
   { href: '/appointments', label: 'Appointments', icon: Calendar },
   { href: '/exercise', label: 'Exercise', icon: Dumbbell },
@@ -48,20 +52,26 @@ export default function MobileNav() {
   const { user, logout } = useAuthStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   const isAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
     if (isAdmin) return;
     let cancelled = false;
-    const fetchCount = async () => {
+    const fetchCounts = async () => {
       try {
-        const res = await api.get('/notifications/unread-count');
-        if (!cancelled) setUnreadCount(res.data?.count ?? 0);
+        const [n, m] = await Promise.all([
+          api.get('/notifications/unread-count').catch(() => null),
+          api.get('/messages/unread-count').catch(() => null),
+        ]);
+        if (cancelled) return;
+        setUnreadCount(n?.data?.count ?? 0);
+        setUnreadMessages(m?.data?.count ?? 0);
       } catch {}
     };
-    fetchCount();
-    const id = setInterval(fetchCount, 30000);
+    fetchCounts();
+    const id = setInterval(fetchCounts, 30000);
     return () => { cancelled = true; clearInterval(id); };
   }, [isAdmin]);
 
@@ -92,7 +102,12 @@ export default function MobileNav() {
         <div className="flex items-stretch justify-around">
           {activeLinks.map((link) => {
             const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
-            const showBadge = (link as any).showBadge && unreadCount > 0;
+            const badgeCount = (link as any).showBadge
+              ? unreadCount
+              : (link as any).messagesBadge
+              ? unreadMessages
+              : 0;
+            const showBadge = badgeCount > 0;
             return (
               <Link
                 key={link.href}
@@ -106,7 +121,7 @@ export default function MobileNav() {
                   <link.icon size={22} />
                   {showBadge && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] rounded-full min-w-[14px] h-[14px] px-1 flex items-center justify-center">
-                      {unreadCount > 9 ? '9+' : unreadCount}
+                      {badgeCount > 9 ? '9+' : badgeCount}
                     </span>
                   )}
                 </span>
@@ -162,7 +177,8 @@ export default function MobileNav() {
               <ul className="space-y-1">
                 {(isAdmin ? adminLinks : allLinks).map((link: any) => {
                   const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
-                  const showBadge = link.showBadge && unreadCount > 0;
+                  const badgeCount = link.showBadge ? unreadCount : link.messagesBadge ? unreadMessages : 0;
+                  const showBadge = badgeCount > 0;
                   return (
                     <li key={link.href}>
                       <Link
@@ -178,7 +194,7 @@ export default function MobileNav() {
                         <span className="flex-1">{link.label}</span>
                         {showBadge && (
                           <span className="bg-red-500 text-white text-[10px] rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
-                            {unreadCount}
+                            {badgeCount}
                           </span>
                         )}
                       </Link>

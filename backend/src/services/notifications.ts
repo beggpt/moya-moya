@@ -5,7 +5,8 @@ type CreateNotifArgs = {
   type:
     | 'FRIEND_REQUEST' | 'FRIEND_ACCEPTED' | 'TOPIC_REPLY' | 'POST_COMMENT'
     | 'POST_LIKE' | 'MED_REMINDER' | 'APPOINTMENT_REMINDER' | 'SYSTEM'
-    | 'EDUCATIONAL' | 'SOS_ALERT' | 'CAREGIVER_ALERT' | 'WEEKLY_SUMMARY';
+    | 'EDUCATIONAL' | 'SOS_ALERT' | 'CAREGIVER_ALERT' | 'WEEKLY_SUMMARY'
+    | 'NEW_MESSAGE' | 'HYDRATION_REMINDER';
   title: string;
   body: string;
   data?: Record<string, any>;
