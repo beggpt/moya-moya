@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { hr } from 'date-fns/locale';
 import { Plus, MessageSquare, Pin, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 import api from '@/lib/api';
 
 type ForumCategory =
@@ -203,7 +204,7 @@ export default function ForumPage() {
                   </h3>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-neutral-500 flex-wrap">
-                  <span>{topic.user.name}</span>
+                  <Link href={`/user/${topic.user.id}`} onClick={(e) => e.stopPropagation()} className="hover:text-primary-600">{topic.user.name}</Link>
                   <span>·</span>
                   <span>
                     {formatDistanceToNow(new Date(topic.createdAt), {

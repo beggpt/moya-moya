@@ -12,6 +12,7 @@ import {
   Pin,
   Loader2,
 } from 'lucide-react';
+import Link from 'next/link';
 import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 
@@ -117,9 +118,9 @@ function CommentItem({
         <UserAvatar user={comment.user} size={isNested ? 'sm' : 'md'} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-medium text-neutral-800 text-sm">
+            <Link href={`/user/${comment.user.id}`} className="font-medium text-neutral-800 text-sm hover:text-primary-600">
               {comment.user.name}
-            </span>
+            </Link>
             <span className="text-xs text-neutral-400">
               {format(new Date(comment.createdAt), 'd.M.yyyy HH:mm', {
                 locale: hr,
@@ -273,9 +274,9 @@ export default function TopicDetailPage() {
               <h1 className="text-xl font-bold text-neutral-900">{topic.title}</h1>
             </div>
             <div className="flex items-center gap-2 text-sm text-neutral-500 mb-4 flex-wrap">
-              <span className="font-medium text-neutral-700">
+              <Link href={`/user/${topic.user.id}`} className="font-medium text-neutral-700 hover:text-primary-600">
                 {topic.user.name}
-              </span>
+              </Link>
               <span>·</span>
               <span>
                 {format(new Date(topic.createdAt), 'd. MMMM yyyy. u HH:mm', {

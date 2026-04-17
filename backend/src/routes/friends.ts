@@ -170,7 +170,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
   }
 });
 
-// Get user public profile
+// Get user public profile (full details)
 router.get('/user/:id', async (req: AuthRequest, res) => {
   try {
     const user = await prisma.user.findUnique({
@@ -181,9 +181,22 @@ router.get('/user/:id', async (req: AuthRequest, res) => {
           select: {
             moyamoyaType: true, suzukiStage: true, affectedSide: true,
             diagnosisDate: true, hadSurgery: true, surgeryType: true,
+            surgeryDate: true, surgeryDateLeft: true, surgeryDateRight: true,
+            gender: true, dateOfBirth: true, allergies: true,
+            hospitalName: true, neurologistName: true,
           },
         },
-        _count: { select: { posts: true, symptoms: true } },
+        medications: {
+          where: { active: true },
+          select: { id: true, name: true, dosage: true, unit: true, frequency: true, timesOfDay: true },
+          orderBy: { createdAt: 'desc' },
+        },
+        posts: {
+          select: { id: true, content: true, createdAt: true, _count: { select: { likes: true, comments: true } } },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        },
+        _count: { select: { posts: true, symptoms: true, forumTopics: true } },
       },
     });
     if (!user) return res.status(404).json({ error: 'Korisnik nije pronađen' });
@@ -198,8 +211,20 @@ router.get('/user/:id', async (req: AuthRequest, res) => {
       },
     });
 
+    // Count mutual friends
+    const myFriends = await prisma.friendship.findMany({
+      where: { OR: [{ requesterId: req.user!.id, accepted: true }, { receiverId: req.user!.id, accepted: true }] },
+    });
+    const theirFriends = await prisma.friendship.findMany({
+      where: { OR: [{ requesterId: req.params.id, accepted: true }, { receiverId: req.params.id, accepted: true }] },
+    });
+    const myFriendIds = new Set(myFriends.map((f) => f.requesterId === req.user!.id ? f.receiverId : f.requesterId));
+    const theirFriendIds = new Set(theirFriends.map((f) => f.requesterId === req.params.id ? f.receiverId : f.requesterId));
+    const mutualCount = [...myFriendIds].filter((id) => theirFriendIds.has(id)).length;
+
     res.json({
       ...user,
+      mutualFriends: mutualCount,
       friendshipStatus: friendship
         ? friendship.accepted ? 'friends' : friendship.requesterId === req.user!.id ? 'pending_sent' : 'pending_received'
         : 'none',

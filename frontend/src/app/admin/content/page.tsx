@@ -37,7 +37,7 @@ export default function AdminContentPage() {
 
   const loadArticles = async () => {
     try {
-      const { data } = await api.get('/content', { params: { locale: 'hr' } });
+      const { data } = await api.get('/admin/content');
       setArticles(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error(error);
@@ -128,6 +128,17 @@ export default function AdminContentPage() {
                   </div>
                   <p className="text-sm text-neutral-600 line-clamp-2">{article.body}</p>
                 </div>
+                <button
+                  onClick={async () => {
+                    try {
+                      await api.put(`/admin/content/${article.id}`, { published: !article.published });
+                      loadArticles();
+                    } catch (err) { console.error(err); }
+                  }}
+                  className={`btn-ghost text-xs shrink-0 ${article.published ? 'text-danger' : 'text-primary-600'}`}
+                >
+                  {article.published ? 'Sakrij' : 'Objavi'}
+                </button>
               </div>
             </div>
           ))}
