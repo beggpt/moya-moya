@@ -164,22 +164,42 @@ export default function BloodPressurePage() {
 
       {/* Quick add */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <button onClick={() => openModal('morning')} className="card flex items-center gap-4 hover:shadow-md transition-shadow text-left">
+        <button
+          onClick={() => openModal('morning')}
+          className="card flex items-center gap-4 hover:shadow-md transition-shadow text-left group"
+        >
           <div className="p-3 rounded-xl bg-primary-50">
             <Sunrise className="w-6 h-6 text-primary-500" />
           </div>
-          <div>
+          <div className="flex-1">
             <div className="font-semibold text-neutral-900">Morning reading</div>
-            <div className="text-sm text-neutral-500">Log your morning blood pressure</div>
+            <div className="text-sm text-neutral-500">Tap to log your morning blood pressure</div>
+          </div>
+          <div
+            role="presentation"
+            aria-hidden="true"
+            className="w-14 h-14 rounded-full bg-green-500 group-hover:bg-green-600 shadow-md flex items-center justify-center transition-colors shrink-0"
+          >
+            <Plus className="w-8 h-8 text-white" strokeWidth={2.5} />
           </div>
         </button>
-        <button onClick={() => openModal('evening')} className="card flex items-center gap-4 hover:shadow-md transition-shadow text-left">
+        <button
+          onClick={() => openModal('evening')}
+          className="card flex items-center gap-4 hover:shadow-md transition-shadow text-left group"
+        >
           <div className="p-3 rounded-xl bg-primary-50">
             <Moon className="w-6 h-6 text-primary-500" />
           </div>
-          <div>
+          <div className="flex-1">
             <div className="font-semibold text-neutral-900">Evening reading</div>
-            <div className="text-sm text-neutral-500">Log your evening blood pressure</div>
+            <div className="text-sm text-neutral-500">Tap to log your evening blood pressure</div>
+          </div>
+          <div
+            role="presentation"
+            aria-hidden="true"
+            className="w-14 h-14 rounded-full bg-green-500 group-hover:bg-green-600 shadow-md flex items-center justify-center transition-colors shrink-0"
+          >
+            <Plus className="w-8 h-8 text-white" strokeWidth={2.5} />
           </div>
         </button>
       </div>

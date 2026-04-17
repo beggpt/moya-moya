@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { User as UserIcon, Stethoscope, Activity, AlertTriangle, Check, Loader2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { User as UserIcon, Stethoscope, Activity, AlertTriangle, Check, Loader2, Camera, Upload, X } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 
@@ -71,7 +71,42 @@ function DateInput({ value, onChange, className }: { value: string; onChange: (i
 
 type TabId = 'account' | 'medical' | 'bp' | 'danger';
 
+async function resizeImage(file: File, maxSize = 400): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+        if (width > height) {
+          if (width > maxSize) { height = (height * maxSize) / width; width = maxSize; }
+        } else {
+          if (height > maxSize) { width = (width * maxSize) / height; height = maxSize; }
+        }
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = reject;
+      img.src = e.target!.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function initialsOf(name?: string | null, email?: string | null): string {
+  const src = (name || email || '?').trim();
+  const parts = src.split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return src.slice(0, 2).toUpperCase();
+}
+
 interface PatientProfileData {
+  city?: string | null;
+  country?: string | null;
   dateOfBirth?: string | null;
   gender?: string | null;
   height?: number | string | null;
@@ -112,8 +147,11 @@ export default function ProfilePage() {
 
   // Account tab state
   const [accName, setAccName] = useState('');
-  const [accImage, setAccImage] = useState('');
+  const [accImage, setAccImage] = useState<string | null>('');
   const [accState, setAccState] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Medical tab
   const [profile, setProfile] = useState<PatientProfileData>({});
@@ -155,13 +193,51 @@ export default function ProfilePage() {
   const saveAccount = async () => {
     setAccState('saving');
     try {
-      const res = await api.put('/auth/profile', { name: accName, image: accImage });
-      updateUser({ name: res.data.name, image: res.data.image });
+      const res = await api.put('/auth/profile', { name: accName });
+      updateUser({ name: res.data.name });
       setAccState('success');
       setTimeout(() => setAccState('idle'), 2000);
     } catch {
       setAccState('error');
       setTimeout(() => setAccState('idle'), 3000);
+    }
+  };
+
+  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoError(null);
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError('Warning: file is larger than 5MB. It will be resized and compressed.');
+    }
+    setPhotoUploading(true);
+    try {
+      const dataUrl = await resizeImage(file, 400);
+      setAccImage(dataUrl); // optimistic preview
+      const res = await api.put('/auth/profile', { image: dataUrl });
+      updateUser({ image: res.data.image });
+      setAccImage(res.data.image);
+    } catch (err) {
+      console.error(err);
+      setPhotoError('Failed to upload photo.');
+    } finally {
+      setPhotoUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const removePhoto = async () => {
+    setPhotoUploading(true);
+    setPhotoError(null);
+    try {
+      const res = await api.put('/auth/profile', { image: null });
+      updateUser({ image: res.data.image ?? null });
+      setAccImage(res.data.image ?? null);
+    } catch (err) {
+      console.error(err);
+      setPhotoError('Failed to remove photo.');
+    } finally {
+      setPhotoUploading(false);
     }
   };
 
@@ -249,6 +325,57 @@ export default function ProfilePage() {
       {tab === 'account' && (
         <div className="card space-y-4">
           <h2 className="text-xl font-bold text-neutral-900">Account</h2>
+
+          <div>
+            <label className="label">Profile photo</label>
+            <div className="flex items-center gap-5 mt-2">
+              <div className="relative">
+                {accImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={accImage} alt="avatar" className="w-24 h-24 rounded-full object-cover border border-neutral-200" />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-teal-500 text-white flex items-center justify-center text-2xl font-bold border border-neutral-200">
+                    {initialsOf(accName, user?.email)}
+                  </div>
+                )}
+                {photoUploading && (
+                  <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
+                    <Loader2 size={22} className="text-white animate-spin" />
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoSelect}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={photoUploading}
+                  className="btn-primary flex items-center gap-2 disabled:opacity-60"
+                >
+                  {accImage ? <Camera size={16} /> : <Upload size={16} />}
+                  {accImage ? 'Change photo' : 'Upload photo'}
+                </button>
+                {accImage && (
+                  <button
+                    type="button"
+                    onClick={removePhoto}
+                    disabled={photoUploading}
+                    className="text-sm text-neutral-500 hover:text-red-600 flex items-center gap-1 disabled:opacity-60"
+                  >
+                    <X size={14} /> Remove photo
+                  </button>
+                )}
+              </div>
+            </div>
+            {photoError && <p className="mt-2 text-sm text-amber-600">{photoError}</p>}
+          </div>
+
           <div>
             <label className="label">Name</label>
             <input className="input" value={accName} onChange={(e) => setAccName(e.target.value)} />
@@ -256,14 +383,6 @@ export default function ProfilePage() {
           <div>
             <label className="label">Email</label>
             <input className="input bg-neutral-100" value={user?.email || ''} readOnly />
-          </div>
-          <div>
-            <label className="label">Avatar URL</label>
-            <input className="input" value={accImage} onChange={(e) => setAccImage(e.target.value)} placeholder="https://…" />
-            {accImage && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={accImage} alt="avatar" className="mt-3 w-20 h-20 rounded-full object-cover border border-neutral-200" />
-            )}
           </div>
           <div className="flex items-center justify-between pt-2">
             <Feedback state={accState} />
@@ -279,6 +398,14 @@ export default function ProfilePage() {
           <h2 className="text-xl font-bold text-neutral-900">Medical info</h2>
 
           <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="label">City</label>
+              <input className="input" value={profile.city || ''} onChange={(e) => updateProfileField('city', e.target.value)} placeholder="e.g. Zagreb" />
+            </div>
+            <div>
+              <label className="label">Country</label>
+              <input className="input" value={profile.country || ''} onChange={(e) => updateProfileField('country', e.target.value)} placeholder="e.g. Croatia" />
+            </div>
             <div>
               <label className="label">Date of birth</label>
               <DateInput value={String(profile.dateOfBirth || '')} onChange={(v) => updateProfileField('dateOfBirth', v)} />

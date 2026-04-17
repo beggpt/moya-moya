@@ -7,7 +7,7 @@ import { createNotification, notifyTopicSubscribers } from '../services/notifica
 const router = Router();
 router.use(authMiddleware);
 
-const CATEGORIES = ['GENERAL', 'SYMPTOMS', 'TREATMENT', 'SURGERY', 'LIFESTYLE', 'MENTAL_HEALTH', 'CAREGIVERS', 'RESEARCH'] as const;
+const CATEGORIES = ['GENERAL', 'SYMPTOMS', 'TREATMENT', 'SURGERY', 'PRE_SURGERY_SUPPORT', 'FRESHLY_DIAGNOSED', 'LIFESTYLE', 'MENTAL_HEALTH', 'CAREGIVERS', 'RESEARCH'] as const;
 
 const topicSchema = z.object({
   title: z.string().min(3).max(200),

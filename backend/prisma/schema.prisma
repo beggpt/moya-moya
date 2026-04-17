@@ -101,6 +101,9 @@ model PatientProfile {
   allergies        String?
   otherConditions  String?
 
+  city             String?
+  country          String?
+
   emergencyContact  String?
   emergencyPhone    String?
   emergencyRelation String?
@@ -490,6 +493,8 @@ enum ForumCategory {
   SYMPTOMS
   TREATMENT
   SURGERY
+  PRE_SURGERY_SUPPORT
+  FRESHLY_DIAGNOSED
   LIFESTYLE
   MENTAL_HEALTH
   CAREGIVERS

@@ -21,9 +21,9 @@ interface AppShellProps {
 export default function AppShell({ children, hideSOS = false }: AppShellProps) {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-neutral-50 overflow-x-hidden">
         <Sidebar />
-        <main className="md:ml-64 p-4 md:p-8 pb-24 md:pb-8 min-h-screen">
+        <main className="md:ml-64 p-4 md:p-8 pb-24 md:pb-8 min-h-screen min-w-0 max-w-full">
           {children}
         </main>
         {!hideSOS && <SOSButton />}

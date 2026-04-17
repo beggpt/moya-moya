@@ -14,7 +14,7 @@ import { useAuthStore } from '@/lib/store';
 
 // ── Types ──
 
-type ForumCategory = 'GENERAL' | 'SYMPTOMS' | 'TREATMENT' | 'SURGERY' | 'LIFESTYLE' | 'MENTAL_HEALTH' | 'CAREGIVERS' | 'RESEARCH';
+type ForumCategory = 'GENERAL' | 'SYMPTOMS' | 'TREATMENT' | 'SURGERY' | 'PRE_SURGERY_SUPPORT' | 'FRESHLY_DIAGNOSED' | 'LIFESTYLE' | 'MENTAL_HEALTH' | 'CAREGIVERS' | 'RESEARCH';
 
 interface Topic {
   id: string;
@@ -48,19 +48,24 @@ interface PostComment {
 
 const CATEGORY_LABELS: Record<ForumCategory, string> = {
   GENERAL: 'General', SYMPTOMS: 'Symptoms', TREATMENT: 'Treatment',
-  SURGERY: 'Surgery', LIFESTYLE: 'Lifestyle', MENTAL_HEALTH: 'Mental health',
-  CAREGIVERS: 'Caregivers', RESEARCH: 'Research',
+  SURGERY: 'Surgery', PRE_SURGERY_SUPPORT: 'Pre-surgery support',
+  FRESHLY_DIAGNOSED: 'Freshly diagnosed', LIFESTYLE: 'Lifestyle',
+  MENTAL_HEALTH: 'Mental health', CAREGIVERS: 'Caregivers', RESEARCH: 'Research',
 };
 
 const CATEGORY_COLORS: Record<ForumCategory, string> = {
   GENERAL: 'bg-neutral-100 text-neutral-700', SYMPTOMS: 'bg-red-100 text-red-700',
   TREATMENT: 'bg-blue-100 text-blue-700', SURGERY: 'bg-purple-100 text-purple-700',
+  PRE_SURGERY_SUPPORT: 'bg-indigo-100 text-indigo-700',
+  FRESHLY_DIAGNOSED: 'bg-orange-100 text-orange-700',
   LIFESTYLE: 'bg-green-100 text-green-700', MENTAL_HEALTH: 'bg-amber-100 text-amber-700',
   CAREGIVERS: 'bg-pink-100 text-pink-700', RESEARCH: 'bg-cyan-100 text-cyan-700',
 };
 
 const CATEGORY_TABS: { label: string; value: ForumCategory | '' }[] = [
   { label: 'All', value: '' },
+  { label: 'Freshly diagnosed', value: 'FRESHLY_DIAGNOSED' },
+  { label: 'Pre-surgery', value: 'PRE_SURGERY_SUPPORT' },
   { label: 'General', value: 'GENERAL' },
   { label: 'Symptoms', value: 'SYMPTOMS' },
   { label: 'Treatment', value: 'TREATMENT' },

@@ -13,6 +13,8 @@ type ForumCategory =
   | 'SYMPTOMS'
   | 'TREATMENT'
   | 'SURGERY'
+  | 'PRE_SURGERY_SUPPORT'
+  | 'FRESHLY_DIAGNOSED'
   | 'LIFESTYLE'
   | 'MENTAL_HEALTH'
   | 'CAREGIVERS'
@@ -31,6 +33,8 @@ interface Topic {
 
 const CATEGORY_TABS: { label: string; value: ForumCategory | '' }[] = [
   { label: 'All', value: '' },
+  { label: 'Freshly diagnosed', value: 'FRESHLY_DIAGNOSED' },
+  { label: 'Pre-surgery support', value: 'PRE_SURGERY_SUPPORT' },
   { label: 'General', value: 'GENERAL' },
   { label: 'Symptoms', value: 'SYMPTOMS' },
   { label: 'Treatment', value: 'TREATMENT' },
@@ -46,6 +50,8 @@ const CATEGORY_LABELS: Record<ForumCategory, string> = {
   SYMPTOMS: 'Symptoms',
   TREATMENT: 'Treatment',
   SURGERY: 'Surgery',
+  PRE_SURGERY_SUPPORT: 'Pre-surgery support',
+  FRESHLY_DIAGNOSED: 'Freshly diagnosed',
   LIFESTYLE: 'Lifestyle',
   MENTAL_HEALTH: 'Mental health',
   CAREGIVERS: 'Caregivers',
@@ -57,6 +63,8 @@ const CATEGORY_COLORS: Record<ForumCategory, string> = {
   SYMPTOMS: 'bg-red-100 text-red-700',
   TREATMENT: 'bg-blue-100 text-blue-700',
   SURGERY: 'bg-purple-100 text-purple-700',
+  PRE_SURGERY_SUPPORT: 'bg-indigo-100 text-indigo-700',
+  FRESHLY_DIAGNOSED: 'bg-orange-100 text-orange-700',
   LIFESTYLE: 'bg-green-100 text-green-700',
   MENTAL_HEALTH: 'bg-amber-100 text-amber-700',
   CAREGIVERS: 'bg-pink-100 text-pink-700',

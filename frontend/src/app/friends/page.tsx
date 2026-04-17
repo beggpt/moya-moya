@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Search, UserPlus, UserCheck, UserX, Users, MessageCircle, Trash2 } from 'lucide-react';
+import { Search, UserPlus, UserCheck, UserX, Users, MessageCircle, Trash2, Sparkles, MapPin } from 'lucide-react';
+import Link from 'next/link';
 import api from '@/lib/api';
 
-type Tab = 'friends' | 'requests' | 'search';
+type Tab = 'friends' | 'requests' | 'suggested' | 'search';
 type FriendshipStatus = 'none' | 'pending_sent' | 'pending_received' | 'friends';
 
 interface Friend {
@@ -27,6 +28,22 @@ interface SearchUser {
   suzukiStage: number;
   diagnosisDate: string;
   friendshipStatus: FriendshipStatus;
+}
+
+interface Suggested {
+  id: string;
+  name: string;
+  image?: string | null;
+  score: number;
+  matchReasons: string[];
+  profile?: {
+    moyamoyaType?: 'DISEASE' | 'SYNDROME' | null;
+    suzukiStage?: number | null;
+    affectedSide?: 'LEFT' | 'RIGHT' | 'BILATERAL' | null;
+    hadSurgery?: boolean | null;
+    city?: string | null;
+    country?: string | null;
+  };
 }
 
 function getInitial(name: string) {
@@ -78,6 +95,7 @@ export default function FriendsPage() {
   const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggested, setSuggested] = useState<Suggested[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchFriends = useCallback(async () => {
@@ -104,10 +122,30 @@ export default function FriendsPage() {
     }
   }, []);
 
+  const fetchSuggested = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/friends/suggested');
+      setSuggested(res.data);
+    } catch {
+      /* ignore */
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (tab === 'friends') fetchFriends();
     if (tab === 'requests') fetchRequests();
-  }, [tab, fetchFriends, fetchRequests]);
+    if (tab === 'suggested') fetchSuggested();
+  }, [tab, fetchFriends, fetchRequests, fetchSuggested]);
+
+  const sendSuggestedRequest = async (userId: string) => {
+    try {
+      await api.post('/friends/request', { userId });
+      setSuggested((prev) => prev.filter((u) => u.id !== userId));
+    } catch {}
+  };
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -167,6 +205,7 @@ export default function FriendsPage() {
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: 'friends', label: 'Friends', icon: <Users size={18} /> },
     { key: 'requests', label: 'Requests', icon: <UserPlus size={18} /> },
+    { key: 'suggested', label: 'Suggested', icon: <Sparkles size={18} /> },
     { key: 'search', label: 'Search', icon: <Search size={18} /> },
   ];
 
@@ -178,7 +217,7 @@ export default function FriendsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         {tabs.map((t) => (
           <button
             key={t.key}
@@ -279,6 +318,86 @@ export default function FriendsPage() {
                 </div>
               </div>
             ))
+          )}
+        </div>
+      )}
+
+      {/* Suggested Tab */}
+      {tab === 'suggested' && (
+        <div className="space-y-4">
+          <div className="bg-primary-50 border border-primary-100 rounded-xl p-4 text-sm text-primary-800">
+            <p className="flex items-start gap-2">
+              <Sparkles size={18} className="shrink-0 mt-0.5" />
+              <span>
+                <strong>People like you.</strong> Sorted by diagnosis similarity — same moyamoya type,
+                affected side, Suzuki stage, surgery status, and location.
+              </span>
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-12 text-neutral-500">Finding matches...</div>
+          ) : suggested.length === 0 ? (
+            <div className="text-center py-12">
+              <Sparkles size={48} className="mx-auto text-neutral-300 mb-4" />
+              <p className="text-neutral-500">No suggestions yet.</p>
+              <p className="text-neutral-400 text-sm mt-1">Complete your profile to get better matches.</p>
+            </div>
+          ) : (
+            suggested.map((u) => {
+              const p = u.profile;
+              return (
+                <div key={u.id} className="card flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <Link href={`/user/${u.id}`} className="shrink-0">
+                    {u.image ? (
+                      <img src={u.image} alt={u.name} className="w-12 h-12 rounded-full object-cover" />
+                    ) : (
+                      <Avatar name={u.name} />
+                    )}
+                  </Link>
+                  <div className="flex-1 min-w-0">
+                    <Link href={`/user/${u.id}`} className="font-semibold text-neutral-900 hover:text-primary-600 block truncate">
+                      {u.name}
+                    </Link>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      {p?.moyamoyaType && (
+                        <MoyamoyaBadge type={p.moyamoyaType === 'DISEASE' ? 'disease' : 'syndrome'} />
+                      )}
+                      {p?.suzukiStage && (
+                        <span className="text-xs text-neutral-500">Suzuki stage {p.suzukiStage}</span>
+                      )}
+                      {p?.affectedSide && (
+                        <span className="text-xs text-neutral-500">
+                          {p.affectedSide === 'LEFT' ? 'Left' : p.affectedSide === 'RIGHT' ? 'Right' : 'Bilateral'}
+                        </span>
+                      )}
+                      {(p?.city || p?.country) && (
+                        <span className="text-xs text-neutral-500 flex items-center gap-1">
+                          <MapPin size={12} />
+                          {[p?.city, p?.country].filter(Boolean).join(', ')}
+                        </span>
+                      )}
+                    </div>
+                    {u.matchReasons && u.matchReasons.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {u.matchReasons.map((reason, i) => (
+                          <span key={i} className="badge text-[10px] bg-primary-50 text-primary-700">
+                            ✓ {reason}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => sendSuggestedRequest(u.id)}
+                    className="btn-primary text-sm flex items-center gap-1.5 shrink-0 w-full sm:w-auto justify-center"
+                  >
+                    <UserPlus size={16} />
+                    Add friend
+                  </button>
+                </div>
+              );
+            })
           )}
         </div>
       )}

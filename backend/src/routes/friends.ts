@@ -39,6 +39,109 @@ router.get('/', async (req: AuthRequest, res) => {
   }
 });
 
+// Suggested friends — sorted by diagnosis similarity + location
+router.get('/suggested', async (req: AuthRequest, res) => {
+  try {
+    const me = await prisma.user.findUnique({
+      where: { id: req.user!.id },
+      select: {
+        id: true,
+        profile: {
+          select: {
+            moyamoyaType: true, suzukiStage: true, affectedSide: true,
+            hadSurgery: true, city: true, country: true,
+          },
+        },
+      },
+    });
+
+    // Exclude users I'm already connected to (any direction, any status)
+    const existingRelations = await prisma.friendship.findMany({
+      where: {
+        OR: [{ requesterId: req.user!.id }, { receiverId: req.user!.id }],
+      },
+      select: { requesterId: true, receiverId: true },
+    });
+    const excludedIds = new Set<string>([req.user!.id]);
+    for (const r of existingRelations) {
+      excludedIds.add(r.requesterId);
+      excludedIds.add(r.receiverId);
+    }
+
+    // Fetch candidate users (patients only, with onboarding completed)
+    const candidates = await prisma.user.findMany({
+      where: {
+        id: { notIn: Array.from(excludedIds) },
+        role: 'PATIENT',
+        profile: { onboardingCompleted: true },
+      },
+      select: {
+        id: true, name: true, image: true, createdAt: true,
+        profile: {
+          select: {
+            moyamoyaType: true, suzukiStage: true, affectedSide: true,
+            hadSurgery: true, diagnosisDate: true, city: true, country: true,
+          },
+        },
+        _count: { select: { posts: true, forumTopics: true } },
+      },
+      take: 100,
+    });
+
+    const myP = me?.profile;
+
+    // Score each candidate
+    const scored = candidates.map((c) => {
+      const p = c.profile;
+      let score = 0;
+      const reasons: string[] = [];
+
+      if (myP && p) {
+        if (myP.moyamoyaType && p.moyamoyaType && myP.moyamoyaType === p.moyamoyaType) {
+          score += 30;
+          reasons.push(`Same type (${p.moyamoyaType === 'DISEASE' ? 'Disease' : 'Syndrome'})`);
+        }
+        if (myP.affectedSide && p.affectedSide && myP.affectedSide === p.affectedSide) {
+          score += 20;
+          reasons.push(`Same affected side`);
+        }
+        if (myP.suzukiStage && p.suzukiStage) {
+          const diff = Math.abs(myP.suzukiStage - p.suzukiStage);
+          if (diff === 0) { score += 20; reasons.push('Same Suzuki stage'); }
+          else if (diff === 1) { score += 10; }
+        }
+        if (myP.hadSurgery !== null && p.hadSurgery !== null && myP.hadSurgery === p.hadSurgery) {
+          score += 10;
+          reasons.push(p.hadSurgery ? 'Both had surgery' : 'Neither had surgery');
+        }
+        if (myP.city && p.city && myP.city.toLowerCase() === p.city.toLowerCase()) {
+          score += 25;
+          reasons.push(`Same city (${p.city})`);
+        }
+        if (myP.country && p.country && myP.country.toLowerCase() === p.country.toLowerCase()) {
+          score += 10;
+          if (!reasons.some((r) => r.startsWith('Same city'))) {
+            reasons.push(`Same country`);
+          }
+        }
+      }
+
+      return { ...c, score, matchReasons: reasons.slice(0, 3) };
+    });
+
+    // Sort by score desc, then by recency
+    scored.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    res.json(scored.slice(0, 30));
+  } catch (error) {
+    console.error('Suggested friends error:', error);
+    res.status(500).json({ error: 'Error' });
+  }
+});
+
 // Get pending requests (received)
 router.get('/requests', async (req: AuthRequest, res) => {
   try {
