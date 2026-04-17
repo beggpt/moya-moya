@@ -102,6 +102,7 @@ model PatientProfile {
   otherConditions  String?
 
   city             String?
+  region           String?
   country          String?
 
   emergencyContact  String?

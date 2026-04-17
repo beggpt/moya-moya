@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { User as UserIcon, Stethoscope, Activity, AlertTriangle, Check, Loader2, Camera, Upload, X } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
+import { COUNTRIES, REGIONS, hasRegions } from '@/lib/locations';
 
 /** DD/MM/YYYY date input that stores ISO (YYYY-MM-DD) internally */
 function DateInput({ value, onChange, className }: { value: string; onChange: (iso: string) => void; className?: string }) {
@@ -106,6 +107,7 @@ function initialsOf(name?: string | null, email?: string | null): string {
 
 interface PatientProfileData {
   city?: string | null;
+  region?: string | null;
   country?: string | null;
   dateOfBirth?: string | null;
   gender?: string | null;
@@ -398,14 +400,57 @@ export default function ProfilePage() {
           <h2 className="text-xl font-bold text-neutral-900">Medical info</h2>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="label">City</label>
-              <input className="input" value={profile.city || ''} onChange={(e) => updateProfileField('city', e.target.value)} placeholder="e.g. Zagreb" />
-            </div>
-            <div>
+            <div className="md:col-span-2">
               <label className="label">Country</label>
-              <input className="input" value={profile.country || ''} onChange={(e) => updateProfileField('country', e.target.value)} placeholder="e.g. Croatia" />
+              <select
+                className="input"
+                value={profile.country || ''}
+                onChange={(e) => {
+                  updateProfileField('country', e.target.value);
+                  updateProfileField('region', '');
+                }}
+              >
+                <option value="">Select country...</option>
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>{c.name}</option>
+                ))}
+              </select>
             </div>
+            {profile.country && (
+              <>
+                <div>
+                  <label className="label">{profile.country === 'US' ? 'State' : 'Region'}</label>
+                  {hasRegions(profile.country) ? (
+                    <select
+                      className="input"
+                      value={profile.region || ''}
+                      onChange={(e) => updateProfileField('region', e.target.value)}
+                    >
+                      <option value="">Select...</option>
+                      {REGIONS[profile.country!].map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      className="input"
+                      value={profile.region || ''}
+                      onChange={(e) => updateProfileField('region', e.target.value)}
+                      placeholder="Region / province"
+                    />
+                  )}
+                </div>
+                <div>
+                  <label className="label">City</label>
+                  <input
+                    className="input"
+                    value={profile.city || ''}
+                    onChange={(e) => updateProfileField('city', e.target.value)}
+                    placeholder="City"
+                  />
+                </div>
+              </>
+            )}
             <div>
               <label className="label">Date of birth</label>
               <DateInput value={String(profile.dateOfBirth || '')} onChange={(v) => updateProfileField('dateOfBirth', v)} />

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ChevronRight, ChevronLeft, Check, Info, X } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
+import { COUNTRIES, REGIONS, hasRegions } from '@/lib/locations';
 
 const steps = ['Personal info', 'Diagnosis', 'Surgery', 'Medications', 'Emergency contact'];
 
@@ -113,6 +114,7 @@ export default function OnboardingPage() {
   // Form data
   const [profile, setProfile] = useState({
     dateOfBirth: '', gender: '', height: '', weight: '',
+    country: '', region: '', city: '',
     diagnosisDate: '', moyamoyaType: 'DISEASE' as 'DISEASE' | 'SYNDROME',
     suzukiStage: '', affectedSide: '' as '' | 'LEFT' | 'RIGHT' | 'BILATERAL',
     underlyingCondition: '',
@@ -243,6 +245,65 @@ export default function OnboardingPage() {
                   <input type="number" value={profile.weight} onChange={(e) => updateProfile('weight', e.target.value)} className="input" placeholder="70" />
                 </div>
               </div>
+
+              {/* Location */}
+              <div>
+                <label className="label">Country</label>
+                <select
+                  value={profile.country}
+                  onChange={(e) => {
+                    updateProfile('country', e.target.value);
+                    // Reset region when country changes
+                    updateProfile('region', '');
+                  }}
+                  className="input"
+                >
+                  <option value="">Select country...</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {profile.country && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">
+                      {profile.country === 'US' ? 'State' : 'Region'}
+                    </label>
+                    {hasRegions(profile.country) ? (
+                      <select
+                        value={profile.region}
+                        onChange={(e) => updateProfile('region', e.target.value)}
+                        className="input"
+                      >
+                        <option value="">Select...</option>
+                        {REGIONS[profile.country].map((r) => (
+                          <option key={r} value={r}>{r}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={profile.region}
+                        onChange={(e) => updateProfile('region', e.target.value)}
+                        className="input"
+                        placeholder="Region / province"
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <label className="label">City</label>
+                    <input
+                      type="text"
+                      value={profile.city}
+                      onChange={(e) => updateProfile('city', e.target.value)}
+                      className="input"
+                      placeholder="City"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

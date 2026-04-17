@@ -49,7 +49,7 @@ router.get('/suggested', async (req: AuthRequest, res) => {
         profile: {
           select: {
             moyamoyaType: true, suzukiStage: true, affectedSide: true,
-            hadSurgery: true, city: true, country: true,
+            hadSurgery: true, city: true, region: true, country: true,
           },
         },
       },
@@ -80,7 +80,7 @@ router.get('/suggested', async (req: AuthRequest, res) => {
         profile: {
           select: {
             moyamoyaType: true, suzukiStage: true, affectedSide: true,
-            hadSurgery: true, diagnosisDate: true, city: true, country: true,
+            hadSurgery: true, diagnosisDate: true, city: true, region: true, country: true,
           },
         },
         _count: { select: { posts: true, forumTopics: true } },
@@ -117,10 +117,13 @@ router.get('/suggested', async (req: AuthRequest, res) => {
         if (myP.city && p.city && myP.city.toLowerCase() === p.city.toLowerCase()) {
           score += 25;
           reasons.push(`Same city (${p.city})`);
+        } else if (myP.region && p.region && myP.region.toLowerCase() === p.region.toLowerCase()) {
+          score += 15;
+          reasons.push(`Same region (${p.region})`);
         }
         if (myP.country && p.country && myP.country.toLowerCase() === p.country.toLowerCase()) {
           score += 10;
-          if (!reasons.some((r) => r.startsWith('Same city'))) {
+          if (!reasons.some((r) => r.startsWith('Same city') || r.startsWith('Same region'))) {
             reasons.push(`Same country`);
           }
         }

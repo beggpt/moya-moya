@@ -26,6 +26,7 @@ const profileSchema = z.object({
   allergies: z.string().optional().nullable(),
   otherConditions: z.string().optional().nullable(),
   city: z.string().optional().nullable(),
+  region: z.string().optional().nullable(),
   country: z.string().optional().nullable(),
   emergencyContact: z.string().optional().nullable(),
   emergencyPhone: z.string().optional().nullable(),
